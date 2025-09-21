@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>AI Chat • EduOrg</title>
+	<link rel="stylesheet" href="/ui/styles.css" />
+	<style>
+		.chatbox{display:grid;gap:12px}
+		.controls{display:flex;gap:8px}
+		textarea{width:100%;min-height:90px}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>AI Chat</h1>
+		<nav>
+			<a href="/ui/index.html">Home</a>
+			<a href="/ui/admin.html">Admin</a>
+		</nav>
+	</header>
+	<main>
+		<section class="panel">
+			<div class="row" style="justify-content:space-between">
+				<div class="badge">Model: <span id="modelName">auto</span></div>
+				<button id="clearBtn" class="small">Clear</button>
+			</div>
+			<div id="messages" class="chat" aria-live="polite"></div>
+			<div class="chatbox">
+				<textarea id="input" class="input" placeholder="Ask anything about schedules, classes, events..."></textarea>
+				<div class="controls">
+					<button id="sendBtn">Send</button>
+				</div>
+			</div>
+		</section>
+	</main>
+	<script>
+	const messagesEl = document.getElementById(messages);
+	const inputEl = document.getElementById(input);
+	const sendBtn = document.getElementById(sendBtn);
+	const clearBtn = document.getElementById(clearBtn);
+	const modelNameEl = document.getElementById(modelName);
+
+	let history = [
+		{ role: system, content: You
