@@ -9,6 +9,8 @@
 		.grid{display:grid;gap:16px}
 		.columns{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 		label{display:block;margin-bottom:6px;color:var(--muted)}
+		select.input{height:38px}
+		hr{border:none;border-top:1px solid #1b2440;margin:12px 0}
 	</style>
 </head>
 <body>
@@ -46,51 +48,50 @@
 		<section id="adminPanels" class="grid" style="display:none">
 			<div class="columns">
 				<div class="card">
-					<h3>Users</h3>
-					<div class="row"><button id="refreshUsers">Refresh</button></div>
-					<div id="users" class="list"></div>
+					<h3>Roles</h3>
+					<div class="row"><button id="refreshRoles">Refresh</button></div>
+					<div id="roles" class="list"></div>
+					<hr />
+					<h4>Create Role</h4>
+					<label>Name</label>
+					<input id="roleName" class="input" />
+					<label>Description</label>
+					<input id="roleDesc" class="input" />
+					<div class="row" style="margin-top:10px"><button id="createRole">Create Role</button></div>
 				</div>
 				<div class="card">
-					<h3>Event Types</h3>
-					<div class="row"><button id="refreshTypes">Refresh</button></div>
-					<div id="types" class="list"></div>
+					<h3>Permissions</h3>
+					<div class="row"><button id="refreshPermissions">Refresh</button></div>
+					<div id="permissions" class="list"></div>
+					<hr />
+					<h4>Create Permission</h4>
+					<label>Name</label>
+					<input id="permName" class="input" />
+					<label>Description</label>
+					<input id="permDesc" class="input" />
+					<div class="row" style="margin-top:10px"><button id="createPermission">Create Permission</button></div>
 				</div>
 			</div>
-			<div class="card">
-				<h3>Create Event</h3>
-				<div class="columns">
-					<div>
-						<label>Type</label>
-						<select id="evtType" class="input"></select>
-					</div>
-					<div>
-						<label>Title</label>
-						<input id="evtTitle" class="input" />
-					</div>
-					<div>
-						<label>Start</label>
-						<input id="evtStart" class="input" type="datetime-local" />
-					</div>
-					<div>
-						<label>End</label>
-						<input id="evtEnd" class="input" type="datetime-local" />
-					</div>
+			<div class="columns">
+				<div class="card">
+					<h3>Assign Permissions to Role</h3>
+					<label>Role</label>
+					<select id="roleSelect" class="input"></select>
+					<div id="permChecks" class="list" style="margin-top:8px"></div>
+					<div class="row" style="margin-top:10px"><button id="saveRolePerms">Save Permissions</button></div>
 				</div>
-				<label>Description</label>
-				<textarea id="evtDesc" class="input" rows="3"></textarea>
-				<div class="row" style="margin-top:10px"><button id="createEvent">Create</button></div>
-			</div>
-			<div class="card">
-				<h3>Events</h3>
-				<div class="row"><button id="refreshEvents">Refresh</button></div>
-				<div id="events" class="list"></div>
+				<div class="card">
+					<h3>Assign Roles to User</h3>
+					<label>User</label>
+					<select id="userSelect" class="input"></select>
+					<div id="roleChecks" class="list" style="margin-top:8px"></div>
+					<div class="row" style="margin-top:10px"><button id="saveUserRoles">Save Roles</button></div>
+				</div>
 			</div>
 		</section>
 	</main>
 	<script>
-	const state = {
-		token: localStorage.getItem(token) || null
-	};
+	const state = { token: localStorage.getItem(token) || null };
 
 	const authStateEl = document.getElementById(authState);
 	const loginFormEl = document.getElementById(loginForm);
