@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
+from starlette.staticfiles import StaticFiles
 
 from app.core.config import get_settings
 from app.db.database import Base, engine
@@ -34,6 +35,9 @@ app.include_router(roles_router.router, prefix="/roles", tags=["roles"])
 app.include_router(permissions_router.router, prefix="/permissions", tags=["permissions"]) 
 app.include_router(events_router.router, prefix="/events", tags=["events"]) 
 app.include_router(ai_router.router, prefix="/ai", tags=["ai"]) 
+
+# Serve static UI
+app.mount("/ui", StaticFiles(directory="app/ui", html=True), name="ui")
 
 
 @app.get("/health")
