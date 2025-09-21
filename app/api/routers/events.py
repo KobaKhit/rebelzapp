@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
@@ -14,6 +14,11 @@ from app.services.event_registry import event_registry
 
 
 router = APIRouter()
+
+
+@router.get("/types", response_model=Dict[str, str])
+def list_event_types() -> Dict[str, str]:
+	return event_registry.list_types()
 
 
 @router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_permissions("manage_events"))])
