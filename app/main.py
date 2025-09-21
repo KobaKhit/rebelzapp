@@ -1,0 +1,51 @@
+from __future__ import annotations
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import ORJSONResponse
+from starlette.staticfiles import StaticFiles
+
+from app.core.config import get_settings
+from app.db.database import Base, engine
+
+from app.api.routers import auth as auth_router
+from app.api.routers import users as users_router
+from app.api.routers import roles as roles_router
+from app.api.routers import permissions as permissions_router
+from app.api.routers import events as events_router
+from app.api.routers import ai as ai_router
+
+
+settings = get_settings()
+
+app = FastAPI(title=settings.app_name, version="0.1.0", default_response_class=ORJSONResponse)
+
+app.add_middleware(
+	CORSMiddleware,
+	allow_origins=settings.allowed_origins or ["*"],
+	allow_credentials=True,
+	allow_methods=["*"],
+	allow_headers=["*"],
+)
+
+
+app.include_router(auth_router.router, prefix="/auth", tags=["auth"])
+app.include_router(users_router.router, prefix="/users", tags=["users"])
+app.include_router(roles_router.router, prefix="/roles", tags=["roles"])
+app.include_router(permissions_router.router, prefix="/permissions", tags=["permissions"]) 
+app.include_router(events_router.router, prefix="/events", tags=["events"]) 
+app.include_router(ai_router.router, prefix="/ai", tags=["ai"]) 
+
+# Serve static UI
+app.mount("/ui", StaticFiles(directory="app/ui", html=True), name="ui")
+
+
+@app.get("/health")
+async def health() -> dict:
+	return {"status": "ok"}
+
+
+@app.on_event("startup")
+async def on_startup() -> None:
+	# Create tables on startup (for dev). In prod, prefer Alembic migrations.
+	Base.metadata.create_all(bind=engine)
