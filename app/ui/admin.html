@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Admin • EduOrg</title>
+	<link rel="stylesheet" href="/ui/styles.css" />
+	<style>
+		.grid{display:grid;gap:16px}
+		.columns{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+		label{display:block;margin-bottom:6px;color:var(--muted)}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>Admin</h1>
+		<nav>
+			<a href="/ui/index.html">Home</a>
+			<a href="/ui/chat.html">AI Chat</a>
+		</nav>
+	</header>
+	<main class="grid">
+		<section class="panel">
+			<div class="row" style="justify-content:space-between;align-items:center">
+				<div>
+					<span class="badge">Auth</span>
+					<span id="authState" class="small">Signed out</span>
+				</div>
+				<div class="row">
+					<button id="logoutBtn" style="display:none">Logout</button>
+				</div>
+			</div>
+			<div id="loginForm" class="columns">
+				<div class="card">
+					<h3>Login</h3>
+					<label>Email</label>
+					<input id="email" class="input" type="email" placeholder="admin@example.com" />
+					<label>Password</label>
+					<input id="password" class="input" type="password" placeholder="admin12345" />
+					<div class="row" style="margin-top:10px"><button id="loginBtn">Login</button></div>
+					<p class="small">Use the seeded admin if you ran scripts/seed.py</p>
+				</div>
+			</div>
+		</section>
+
+		<section id="adminPanels" class="grid" style="display:none">
+			<div class="columns">
+				<div class="card">
+					<h3>Users</h3>
+					<div class="row"><button id="refreshUsers">Refresh</button></div>
+					<div id="users" class="list"></div>
+				</div>
+				<div class="card">
+					<h3>Event Types</h3>
+					<div class="row"><button id="refreshTypes">Refresh</button></div>
+					<div id="types" class="list"></div>
+				</div>
+			</div>
+			<div class="card">
+				<h3>Create Event</h3>
+				<div class="columns">
+					<div>
+						<label>Type</label>
+						<select id="evtType" class="input"></select>
+					</div>
+					<div>
+						<label>Title</label>
+						<input id="evtTitle" class="input" />
+					</div>
+					<div>
+						<label>Start</label>
+						<input id="evtStart" class="input" type="datetime-local" />
+					</div>
+					<div>
+						<label>End</label>
+						<input id="evtEnd" class="input" type="datetime-local" />
+					</div>
+				</div>
+				<label>Description</label>
+				<textarea id="evtDesc" class="input" rows="3"></textarea>
+				<div class="row" style="margin-top:10px"><button id="createEvent">Create</button></div>
+			</div>
+			<div class="card">
+				<h3>Events</h3>
+				<div class="row"><button id="refreshEvents">Refresh</button></div>
+				<div id="events" class="list"></div>
+			</div>
+		</section>
+	</main>
+	<script>
+	const state = {
+		token: localStorage.getItem(token) || null
+	};
+
+	const authStateEl = document.getElementById(authState);
+	const loginFormEl = document.getElementById(loginForm);
+	const adminPanelsEl = document.getElementById(adminPanels);
+	const logoutBtn = document.getElementById(logoutBtn);
+
+	function setAuthUI(){
+		if(state.token){
+			authStateEl.textContent = Signed
