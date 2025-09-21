@@ -7,6 +7,13 @@ from fastapi.responses import ORJSONResponse
 from app.core.config import get_settings
 from app.db.database import Base, engine
 
+from app.api.routers import auth as auth_router
+from app.api.routers import users as users_router
+from app.api.routers import roles as roles_router
+from app.api.routers import permissions as permissions_router
+from app.api.routers import events as events_router
+from app.api.routers import ai as ai_router
+
 
 settings = get_settings()
 
@@ -21,14 +28,12 @@ app.add_middleware(
 )
 
 
-# Routers will be added after they are created
-# from app.api.routers import auth, users, roles, permissions, events, ai
-# app.include_router(auth.router, prefix="/auth", tags=["auth"])
-# app.include_router(users.router, prefix="/users", tags=["users"])
-# app.include_router(roles.router, prefix="/roles", tags=["roles"])
-# app.include_router(permissions.router, prefix="/permissions", tags=["permissions"]) 
-# app.include_router(events.router, prefix="/events", tags=["events"]) 
-# app.include_router(ai.router, prefix="/ai", tags=["ai"]) 
+app.include_router(auth_router.router, prefix="/auth", tags=["auth"])
+app.include_router(users_router.router, prefix="/users", tags=["users"])
+app.include_router(roles_router.router, prefix="/roles", tags=["roles"])
+app.include_router(permissions_router.router, prefix="/permissions", tags=["permissions"]) 
+app.include_router(events_router.router, prefix="/events", tags=["events"]) 
+app.include_router(ai_router.router, prefix="/ai", tags=["ai"]) 
 
 
 @app.get("/health")
