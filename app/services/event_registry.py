@@ -203,6 +203,20 @@ class EventRegistry:
 		except Exception:
 			return False
 
+	def list_type_schemas(self) -> Dict[str, dict]:
+		"""Return JSON Schemas for all registered event types keyed by type name.
+
+		The schemas follow Pydantic v2 model_json_schema() output for use in dynamic forms.
+		"""
+		result: Dict[str, dict] = {}
+		for name, schema in self._registry.items():
+			try:
+				result[name] = schema.model_json_schema()
+			except Exception:
+				# Fallback to minimal structure if schema generation fails
+				result[name] = {"title": schema.__name__, "type": "object"}
+		return result
+
 
 # Create the global registry
 event_registry = EventRegistry()
