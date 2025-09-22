@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+import json
+import asyncio
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
 from app.models import User
 from app.schemas.auth import ChatRequest, ChatResponse
-from app.services.llm import ContextAwareLLMClient
+from app.services.llm import ContextAwareLLMClient, RebelzAgent
 
 
 router = APIRouter()
 
+# Create the AG-UI compatible agent
+rebelz_agent = RebelzAgent()
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(
@@ -70,3 +75,108 @@ async def get_help_topics() -> List[dict]:
 			"keywords": ["reports", "analytics", "statistics", "data"]
 		}
 	]
+
+
+# Server-Sent Events endpoint for AG-UI
+@router.get("/events")
+async def ag_ui_events(token: str = None):
+	"""Server-Sent Events stream for AG-UI communication"""
+	# Optional: Validate token here if needed
+	# For now, we'll allow the connection but you could add auth validation
+	
+	async def event_stream():
+		# Send initial connection event
+		yield f"data: {json.dumps({'type': 'connection', 'data': {'status': 'connected'}})}\n\n"
+		
+		# Keep connection alive
+		while True:
+			await asyncio.sleep(30)  # Send heartbeat every 30 seconds
+			yield f"data: {json.dumps({'type': 'heartbeat', 'data': {'timestamp': 'now'}})}\n\n"
+	
+	return StreamingResponse(
+		event_stream(),
+		media_type="text/event-stream",
+		headers={
+			"Cache-Control": "no-cache",
+			"Connection": "keep-alive",
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Headers": "Cache-Control"
+		}
+	)
+
+
+# AG-UI message endpoint
+@router.post("/message")
+async def ag_ui_message(
+	request: Request,
+	current_user: User = Depends(get_current_user),
+	db: Session = Depends(get_db)
+):
+	"""Handle AG-UI message requests"""
+	try:
+		body = await request.json()
+		message_data = body.get('data', {})
+		user_content = message_data.get('content', '')
+		
+		if not user_content:
+			return {"type": "error", "data": {"message": "No content provided"}}
+		
+		# Use the RebelzAgent to process the message
+		agent = RebelzAgent()
+		response = await agent.run(user_content, user=current_user, db=db)
+		
+		# Handle structured responses (like events)
+		if isinstance(response, dict) and response.get("type") == "events":
+			return {
+				"type": "events",
+				"data": response
+			}
+		elif isinstance(response, dict) and response.get("type") == "text":
+			return {
+				"type": "message",
+				"data": {
+					"role": "assistant",
+					"content": response.get("content", "")
+				}
+			}
+		else:
+			# Fallback for string responses
+			return {
+				"type": "message",
+				"data": {
+					"role": "assistant",
+					"content": str(response)
+				}
+			}
+	except Exception as e:
+		print(f"AG-UI Message Error: {str(e)}")  # Simple error logging
+		return {
+			"type": "error", 
+			"data": {"message": f"Error processing message: {str(e)}"}
+		}
+
+
+# AG-UI endpoint - mount the agent as a sub-application
+@router.api_route("/ag-ui/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def ag_ui_proxy(request: Request):
+	"""Proxy requests to AG-UI compatible agent"""
+	# For now, we'll create a simple AG-UI compatible response
+	# In production, you'd mount the actual AG-UI app here
+	ag_ui_app = rebelz_agent.to_ag_ui()
+	return await ag_ui_app(request.scope, request.receive, request._send)
+
+
+@router.get("/ag-ui-info")
+async def ag_ui_info():
+	"""Get AG-UI endpoint information"""
+	return {
+		"ag_ui_endpoint": "/ai/ag-ui",
+		"protocol_version": "0.0.38",
+		"agent_name": "Rebelz Assistant",
+		"capabilities": [
+			"event_management",
+			"user_registration", 
+			"personalized_recommendations",
+			"context_awareness"
+		]
+	}

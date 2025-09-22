@@ -35,9 +35,24 @@ const Events: React.FC = () => {
     },
   });
 
+  const togglePublishMutation = useMutation({
+    mutationFn: ({ id, is_published }: { id: number; is_published: boolean }) =>
+      eventsApi.updateEvent(id, { is_published }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+
   const handleDelete = (id: number) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       deleteMutation.mutate(id);
+    }
+  };
+
+  const handleTogglePublish = (id: number, currentStatus: boolean) => {
+    const action = currentStatus ? 'unpublish' : 'publish';
+    if (window.confirm(`Are you sure you want to ${action} this event?`)) {
+      togglePublishMutation.mutate({ id, is_published: !currentStatus });
     }
   };
 
@@ -166,12 +181,29 @@ const Events: React.FC = () => {
                 
                 {hasPermission('manage_events') && (
                   <div className="bg-gray-50 px-6 py-3 flex justify-between items-center">
-                    <Link
-                      to={`/events/${event.id}/edit`}
-                      className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
-                    >
-                      Edit
-                    </Link>
+                    <div className="flex space-x-4">
+                      <Link
+                        to={`/events/${event.id}/edit`}
+                        className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleTogglePublish(event.id, event.is_published)}
+                        className={`text-sm font-medium ${
+                          event.is_published
+                            ? 'text-amber-600 hover:text-amber-900'
+                            : 'text-green-600 hover:text-green-900'
+                        }`}
+                        disabled={togglePublishMutation.isPending}
+                      >
+                        {togglePublishMutation.isPending
+                          ? 'Updating...'
+                          : event.is_published
+                          ? 'Unpublish'
+                          : 'Publish'}
+                      </button>
+                    </div>
                     <button
                       onClick={() => handleDelete(event.id)}
                       className="text-red-600 hover:text-red-900 text-sm font-medium"

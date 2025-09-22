@@ -123,10 +123,9 @@ def update_event(event_id: int, payload: EventUpdate, db: Session = Depends(get_
 
 
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_permissions("manage_events"))])
-def delete_event(event_id: int, db: Session = Depends(get_db)) -> None:
+def delete_event(event_id: int, db: Session = Depends(get_db)):
 	event = db.get(Event, event_id)
 	if not event:
 		raise HTTPException(status_code=404, detail="Event not found")
 	db.delete(event)
 	db.commit()
-	return None

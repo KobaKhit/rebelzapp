@@ -10,6 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   hasPermission: (permission: string) => boolean;
   hasRole: (role: string) => boolean;
+  authFetch: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -78,6 +79,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return user?.roles.includes(role) || false;
   };
 
+  const authFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}${url}`, {
+      ...options,
+      headers,
+    });
+
+    if (response.status === 401) {
+      // Token is invalid, logout user
+      logout();
+      throw new Error('Unauthorized');
+    }
+
+    return response;
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       if (token) {
@@ -104,6 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     hasPermission,
     hasRole,
+    authFetch,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

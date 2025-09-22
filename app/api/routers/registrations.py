@@ -195,7 +195,7 @@ def cancel_registration(
     registration_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> None:
+):
     """Cancel a registration"""
     registration = db.get(EventRegistration, registration_id)
     if not registration:

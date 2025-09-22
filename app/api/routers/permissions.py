@@ -47,10 +47,9 @@ def update_permission(permission_id: int, payload: PermissionUpdate, db: Session
 
 
 @router.delete("/{permission_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_permission(permission_id: int, db: Session = Depends(get_db)) -> None:
+def delete_permission(permission_id: int, db: Session = Depends(get_db)):
 	perm = db.get(Permission, permission_id)
 	if not perm:
 		raise HTTPException(status_code=404, detail="Permission not found")
 	db.delete(perm)
 	db.commit()
-	return None

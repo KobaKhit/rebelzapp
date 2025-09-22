@@ -97,7 +97,7 @@ eduorg/
 │   ├── models/            # SQLAlchemy models
 │   ├── schemas/           # Pydantic schemas
 │   ├── services/          # Business logic
-│   └── ui/                # Legacy HTML UI
+│   └── (ui folder removed - using React frontend)
 ├── frontend/              # React frontend
 │   ├── src/
 │   │   ├── components/    # Reusable components

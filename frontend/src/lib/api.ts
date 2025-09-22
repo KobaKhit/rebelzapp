@@ -5,14 +5,15 @@ import type {
   Permission,
   Event,
   EventCreate,
-  UserCreate,
-  UserUpdate,
+  EventUpdate,
   RoleCreate,
   PermissionCreate,
-  Token,
   ChatMessage,
   EventTypes,
+  Registration,
+  RegistrationCreate,
 } from '../types';
+import type { UserCreate, UserUpdate, Token } from '../types/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -74,6 +75,11 @@ export const usersApi = {
 
   getUser: async (id: number): Promise<User> => {
     const response = await api.get<User>(`/users/${id}`);
+    return response.data;
+  },
+
+  createUser: async (userData: UserCreate): Promise<User> => {
+    const response = await api.post<User>('/users/', userData);
     return response.data;
   },
 
@@ -155,7 +161,7 @@ export const eventsApi = {
     return response.data;
   },
 
-  updateEvent: async (id: number, eventData: Partial<EventCreate>): Promise<Event> => {
+  updateEvent: async (id: number, eventData: EventUpdate): Promise<Event> => {
     const response = await api.patch<Event>(`/events/${id}`, eventData);
     return response.data;
   },
@@ -185,6 +191,31 @@ export const aiApi = {
   getHelpTopics: async (): Promise<any[]> => {
     const response = await api.get<any[]>('/ai/help/topics');
     return response.data;
+  },
+};
+
+// Registrations API
+export const registrationsApi = {
+  getMyRegistrations: async (): Promise<Registration[]> => {
+    const response = await api.get<Registration[]>('/registrations/my');
+    return response.data;
+  },
+
+  registerForEvent: async (eventId: number, registrationData: Omit<RegistrationCreate, 'event_id'>): Promise<Registration> => {
+    const response = await api.post<Registration>('/registrations/', {
+      event_id: eventId,
+      ...registrationData
+    });
+    return response.data;
+  },
+
+  updateRegistration: async (id: number, updates: Partial<RegistrationCreate>): Promise<Registration> => {
+    const response = await api.patch<Registration>(`/registrations/${id}`, updates);
+    return response.data;
+  },
+
+  cancelRegistration: async (id: number): Promise<void> => {
+    await api.delete(`/registrations/${id}`);
   },
 };
 

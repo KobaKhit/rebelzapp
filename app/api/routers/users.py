@@ -107,13 +107,12 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)) -> UserRead:
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int, db: Session = Depends(get_db)) -> None:
+def delete_user(user_id: int, db: Session = Depends(get_db)):
 	user = db.get(User, user_id)
 	if not user:
 		raise HTTPException(status_code=404, detail="User not found")
 	db.delete(user)
 	db.commit()
-	return None
 
 
 @router.post("/{user_id}/roles", response_model=UserRead)

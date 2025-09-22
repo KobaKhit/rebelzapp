@@ -72,10 +72,9 @@ def set_role_permissions(role_id: int, permissions: List[str], db: Session = Dep
 
 
 @router.delete("/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_role(role_id: int, db: Session = Depends(get_db)) -> None:
+def delete_role(role_id: int, db: Session = Depends(get_db)):
 	role = db.get(Role, role_id)
 	if not role:
 		raise HTTPException(status_code=404, detail="Role not found")
 	db.delete(role)
 	db.commit()
-	return None
