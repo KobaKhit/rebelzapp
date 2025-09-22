@@ -47,17 +47,17 @@ export interface EventCreate {
   is_published: boolean;
 }
 
-export interface EventUpdate {
-  title?: string;
-  description?: string;
-  location?: string;
-  start_time?: string;
-  end_time?: string;
-  data?: Record<string, any>;
-  capacity?: number;
-  is_published?: boolean;
+export interface UserCreate {
+  email: string;
+  full_name?: string;
+  password: string;
 }
 
+export interface UserUpdate {
+  full_name?: string;
+  password?: string;
+  is_active?: boolean;
+}
 
 export interface RoleCreate {
   name: string;
@@ -69,6 +69,10 @@ export interface PermissionCreate {
   description?: string;
 }
 
+export interface Token {
+  access_token: string;
+  token_type: string;
+}
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -78,45 +82,3 @@ export interface ChatMessage {
 export interface EventTypes {
   [key: string]: string;
 }
-
-export interface Registration {
-  id: number;
-  event_id: number;
-  user_id: number;
-  status: string;
-  registration_date: string;
-  notes?: string;
-  emergency_contact?: string;
-  dietary_restrictions?: string;
-  special_needs?: string;
-  // Backend only returns these fields, not the full event object
-  user_email?: string;
-  user_full_name?: string;
-  event_title?: string;
-  // We'll need to fetch the full event separately if needed
-  event?: Event;
-}
-
-export interface RegistrationCreate {
-  event_id: number;
-  notes?: string;
-  emergency_contact?: string;
-  dietary_restrictions?: string;
-  special_needs?: string;
-}
-
-// Re-export all interfaces to ensure they're available
-export type {
-  User,
-  Role,
-  RoleCreate,
-  Permission,
-  PermissionCreate,
-  Event,
-  EventCreate,
-  EventUpdate,
-  EventTypes,
-  ChatMessage,
-  Registration,
-  RegistrationCreate,
-};

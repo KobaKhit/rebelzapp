@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Admin • EduOrg</title>
+	<link rel="stylesheet" href="/ui/styles.css" />
+	<style>
+		.grid{display:grid;gap:16px}
+		.columns{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+		label{display:block;margin-bottom:6px;color:var(--muted)}
+		select.input{height:38px}
+		hr{border:none;border-top:1px solid #1b2440;margin:12px 0}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>Admin</h1>
+		<nav>
+			<a href="/ui/index.html">Home</a>
+			<a href="/ui/chat.html">AI Chat</a>
+		</nav>
+	</header>
+	<main class="grid">
+		<section class="panel">
+			<div class="row" style="justify-content:space-between;align-items:center">
+				<div>
+					<span class="badge">Auth</span>
+					<span id="authState" class="small">Signed out</span>
+				</div>
+				<div class="row">
+					<button id="logoutBtn" style="display:none">Logout</button>
+				</div>
+			</div>
+			<div id="loginForm" class="columns">
+				<div class="card">
+					<h3>Login</h3>
+					<label>Email</label>
+					<input id="email" class="input" type="email" placeholder="admin@example.com" />
+					<label>Password</label>
+					<input id="password" class="input" type="password" placeholder="admin12345" />
+					<div class="row" style="margin-top:10px"><button id="loginBtn">Login</button></div>
+					<p class="small">Use the seeded admin if you ran scripts/seed.py</p>
+				</div>
+			</div>
+		</section>
+
+		<section id="adminPanels" class="grid" style="display:none">
+			<div class="columns">
+				<div class="card">
+					<h3>Roles</h3>
+					<div class="row"><button id="refreshRoles">Refresh</button></div>
+					<div id="roles" class="list"></div>
+					<hr />
+					<h4>Create Role</h4>
+					<label>Name</label>
+					<input id="roleName" class="input" />
+					<label>Description</label>
+					<input id="roleDesc" class="input" />
+					<div class="row" style="margin-top:10px"><button id="createRole">Create Role</button></div>
+				</div>
+				<div class="card">
+					<h3>Permissions</h3>
+					<div class="row"><button id="refreshPermissions">Refresh</button></div>
+					<div id="permissions" class="list"></div>
+					<hr />
+					<h4>Create Permission</h4>
+					<label>Name</label>
+					<input id="permName" class="input" />
+					<label>Description</label>
+					<input id="permDesc" class="input" />
+					<div class="row" style="margin-top:10px"><button id="createPermission">Create Permission</button></div>
+				</div>
+			</div>
+			<div class="columns">
+				<div class="card">
+					<h3>Assign Permissions to Role</h3>
+					<label>Role</label>
+					<select id="roleSelect" class="input"></select>
+					<div id="permChecks" class="list" style="margin-top:8px"></div>
+					<div class="row" style="margin-top:10px"><button id="saveRolePerms">Save Permissions</button></div>
+				</div>
+				<div class="card">
+					<h3>Assign Roles to User</h3>
+					<label>User</label>
+					<select id="userSelect" class="input"></select>
+					<div id="roleChecks" class="list" style="margin-top:8px"></div>
+					<div class="row" style="margin-top:10px"><button id="saveUserRoles">Save Roles</button></div>
+				</div>
+			</div>
+		</section>
+	</main>
+	<script>
+	const state = { token: localStorage.getItem('token') || null };
+
+	const authStateEl = document.getElementById('authState');
+	const loginFormEl = document.getElementById('loginForm');
+	const adminPanelsEl = document.getElementById('adminPanels');
+	const logoutBtn = document.getElementById('logoutBtn');
+
+	function setAuthUI(){
+		if(state.token){
+			authStateEl.textContent = 'Signed in';
+			loginFormEl.style.display = 'none';
+			adminPanelsEl.style.display = 'grid';
+			logoutBtn.style.display = 'inline-block';
+			refreshAll();
+		} else {
+			authStateEl.textContent = 'Signed out';
+			loginFormEl.style.display = 'grid';
+			adminPanelsEl.style.display = 'none';
+			logoutBtn.style.display = 'none';
+		}
+	}
+
+	document.getElementById('loginBtn').addEventListener('click', async ()=>{
+		const email = document.getElementById('email').value.trim();
+		const password = document.getElementById('password').value;
+		const body = new URLSearchParams();
+		body.set('username', email);
+		body.set('password', password);
+		try{
+			const res = await fetch('/auth/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+			if(!res.ok) throw new Error('Login failed');
+			const data = await res.json();
+			state.token = data.access_token;
+			localStorage.setItem('token', state.token);
+			setAuthUI();
+		} catch(err){ alert(err.message); }
+	});
+
+	logoutBtn.addEventListener('click', ()=>{ state.token = null; localStorage.removeItem('token'); setAuthUI(); });
+
+	async function authFetch(url, options={}){
+		const headers = Object.assign({ 'Authorization': 'Bearer ' + state.token }, options.headers||{});
+		const res = await fetch(url, Object.assign({}, options, { headers }));
+		if(res.status === 401 || res.status === 403){ throw new Error('Unauthorized'); }
+		return res;
+	}
+
+	// Data caches
+	let roles = []; // [{id,name,description,permissions:[name]}]
+	let permissions = []; // [{id,name,description}]
+	let users = []; // [{id,email,roles:[name]}]
+
+	async function refreshRoles(){
+		const res = await authFetch('/roles/');
+		roles = await res.json();
+		document.getElementById('roles').innerHTML = roles.map(r => `
+			<div class="card"><div><strong>${r.name}</strong></div>
+			<div class="small">${r.description||''}</div>
+			<div class="small">perms: ${r.permissions.join(', ')}</div></div>
+		`).join('');
+		// fill roleSelect and roleChecks
+		const roleSelect = document.getElementById('roleSelect');
+		roleSelect.innerHTML = roles.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+		refreshRoleChecks();
+	}
+
+	function refreshRoleChecks(){
+		const roleChecks = document.getElementById('roleChecks');
+		roleChecks.innerHTML = roles.map(r=>`<label class="row"><input type="checkbox" value="${r.name}" /> ${r.name}</label>`).join('');
+		// pre-select none until user chosen; selection handled in saveUserRoles
+	}
+
+	async function refreshPermissions(){
+		const res = await authFetch('/permissions/');
+		permissions = await res.json();
+		document.getElementById('permissions').innerHTML = permissions.map(p => `
+			<div class="card"><div><strong>${p.name}</strong></div>
+			<div class="small">${p.description||''}</div></div>
+		`).join('');
+		refreshPermChecks();
+	}
+
+	function refreshPermChecks(){
+		const permChecks = document.getElementById('permChecks');
+		permChecks.innerHTML = permissions.map(p=>`<label class="row"><input type="checkbox" value="${p.name}" /> ${p.name}</label>`).join('');
+		applyRolePermSelection();
+	}
+
+	function applyRolePermSelection(){
+		const roleId = parseInt(document.getElementById('roleSelect').value||'0',10);
+		const role = roles.find(r=>r.id===roleId);
+		const selected = new Set((role?.permissions)||[]);
+		[...document.querySelectorAll('#permChecks input[type=checkbox]')].forEach(cb=>{
+			cb.checked = selected.has(cb.value);
+		});
+	}
+
+	document.getElementById('roleSelect').addEventListener('change', applyRolePermSelection);
+
+	async function refreshUsers(){
+		const res = await authFetch('/users/');
+		users = await res.json();
+		document.getElementById('users')?.replaceChildren();
+		const usersEl = document.getElementById('users');
+		if(usersEl){ usersEl.innerHTML = users.map(u => `<div class="card"><div>${u.email}</div><div class="small">roles: ${u.roles.join(', ')}</div></div>`).join(''); }
+		// fill userSelect
+		const userSelect = document.getElementById('userSelect');
+		userSelect.innerHTML = users.map(u=>`<option value="${u.id}">${u.email}</option>`).join('');
+		applyUserRoleSelection();
+	}
+
+	function applyUserRoleSelection(){
+		const userId = parseInt(document.getElementById('userSelect').value||'0',10);
+		const user = users.find(u=>u.id===userId);
+		const assigned = new Set((user?.roles)||[]);
+		[...document.querySelectorAll('#roleChecks input[type=checkbox]')].forEach(cb=>{
+			cb.checked = assigned.has(cb.value);
+		});
+	}
+
+	document.getElementById('userSelect').addEventListener('change', applyUserRoleSelection);
+
+	async function refreshAll(){
+		await Promise.all([refreshPermissions(), refreshRoles(), refreshUsers()]);
+	}
+
+	// Create role
+	document.getElementById('createRole').addEventListener('click', async ()=>{
+		const name = document.getElementById('roleName').value.trim();
+		const description = document.getElementById('roleDesc').value.trim();
+		if(!name) return alert('Role name required');
+		const res = await authFetch('/roles/', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, description }) });
+		if(!res.ok) return alert('Create role failed');
+		document.getElementById('roleName').value='';
+		document.getElementById('roleDesc').value='';
+		await refreshRoles();
+	});
+
+	// Create permission
+	document.getElementById('createPermission').addEventListener('click', async ()=>{
+		const name = document.getElementById('permName').value.trim();
+		const description = document.getElementById('permDesc').value.trim();
+		if(!name) return alert('Permission name required');
+		const res = await authFetch('/permissions/', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, description }) });
+		if(!res.ok) return alert('Create permission failed');
+		document.getElementById('permName').value='';
+		document.getElementById('permDesc').value='';
+		await refreshPermissions();
+	});
+
+	// Save role permissions
+	document.getElementById('saveRolePerms').addEventListener('click', async ()=>{
+		const roleId = parseInt(document.getElementById('roleSelect').value||'0',10);
+		if(!roleId) return alert('Select a role');
+		const selected = [...document.querySelectorAll('#permChecks input[type=checkbox]')].filter(cb=>cb.checked).map(cb=>cb.value);
+		const res = await authFetch(`/roles/${roleId}/permissions`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(selected) });
+		if(!res.ok) return alert('Save permissions failed');
+		await refreshRoles();
+		applyRolePermSelection();
+	});
+
+	// Save user roles
+	document.getElementById('saveUserRoles').addEventListener('click', async ()=>{
+		const userId = parseInt(document.getElementById('userSelect').value||'0',10);
+		if(!userId) return alert('Select a user');
+		const selected = [...document.querySelectorAll('#roleChecks input[type=checkbox]')].filter(cb=>cb.checked).map(cb=>cb.value);
+		const res = await authFetch(`/users/${userId}/roles`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(selected) });
+		if(!res.ok) return alert('Save user roles failed');
+		await refreshUsers();
+		applyUserRoleSelection();
+	});
+
+	setAuthUI();
+	</script>
+</body>
+</html>

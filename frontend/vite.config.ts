@@ -12,7 +12,6 @@ export default defineConfig({
       '/permissions': 'http://localhost:8000',
       '/events': 'http://localhost:8000',
       '/ai': 'http://localhost:8000',
-      '/api': 'http://localhost:8000',
     },
   },
 })

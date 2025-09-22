@@ -22,22 +22,9 @@ settings = get_settings()
 
 app = FastAPI(title=settings.app_name, version="0.1.0", default_response_class=ORJSONResponse)
 
-# CORS configuration for development
-cors_origins = settings.allowed_origins if settings.allowed_origins else ["*"]
-# Always allow common development origins
-dev_origins = [
-	"http://localhost:3000",
-	"http://localhost:5173", 
-	"http://127.0.0.1:3000",
-	"http://127.0.0.1:5173"
-]
-if settings.env == "development":
-	cors_origins.extend(dev_origins)
-	cors_origins = list(set(cors_origins))  # Remove duplicates
-
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=cors_origins,
+	allow_origins=settings.allowed_origins or ["*"],
 	allow_credentials=True,
 	allow_methods=["*"],
 	allow_headers=["*"],
@@ -52,7 +39,8 @@ app.include_router(events_router.router, prefix="/events", tags=["events"])
 app.include_router(registrations_router.router, prefix="/registrations", tags=["registrations"])
 app.include_router(ai_router.router, prefix="/ai", tags=["ai"]) 
 
-# Static UI removed - using React frontend instead
+# Serve static UI
+app.mount("/ui", StaticFiles(directory="app/ui", html=True), name="ui")
 
 # Optionally serve built Vite frontend if present
 try:

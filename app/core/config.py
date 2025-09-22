@@ -12,9 +12,7 @@ load_dotenv()
 
 
 class Settings(BaseModel):
-	model_config = {"protected_namespaces": (), "frozen": True}
-	
-	app_name: str = Field(default=os.getenv("APP_NAME", "Rebelz API"))
+	app_name: str = Field(default=os.getenv("APP_NAME", "EduOrg API"))
 	env: str = Field(default=os.getenv("ENV", "development"))
 	debug: bool = Field(default=os.getenv("DEBUG", "true").lower() == "true")
 	secret_key: str = Field(default=os.getenv("SECRET_KEY", "change_me"))
@@ -23,6 +21,9 @@ class Settings(BaseModel):
 	allowed_origins: List[str] = Field(default_factory=lambda: [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "*").split(",") if o.strip()])
 	openai_api_key: Optional[str] = Field(default=os.getenv("OPENAI_API_KEY"))
 	model_name: str = Field(default=os.getenv("MODEL_NAME", "gpt-4o-mini"))
+
+	class Config:
+		frozen = True
 
 
 @lru_cache(maxsize=1)
