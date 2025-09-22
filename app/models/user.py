@@ -26,3 +26,4 @@ class User(Base):
 		back_populates="users",
 		overlaps="roles,users",
 	)
+	registrations = relationship("EventRegistration", back_populates="user", cascade="all, delete-orphan")

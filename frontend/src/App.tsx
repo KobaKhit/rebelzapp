@@ -1,56 +1,80 @@
-import React from 'react'
-import { Link, Route, Routes, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './auth/AuthContext'
-import LoginPage from './auth/LoginPage'
-import AdminPage from './pages/AdminPage'
-import EventsPage from './pages/EventsPage'
-import ChatPage from './pages/ChatPage'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider, useAuth } from './lib/auth';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Events from './pages/Events';
+import Chat from './pages/Chat';
 
-function NavBar() {
-  const { token, logout } = useAuth()
-  return (
-    <header style={{display:'flex',justifyContent:'space-between',padding:'12px 16px',borderBottom:'1px solid #ddd'}}>
-      <nav style={{display:'flex',gap:12}}>
-        <Link to="/">Home</Link>
-        <Link to="/events">Events</Link>
-        <Link to="/admin">Admin</Link>
-        <Link to="/chat">AI Chat</Link>
-      </nav>
-      <div>
-        {token ? <button onClick={logout}>Logout</button> : <Link to="/login">Login</Link>}
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const AppRoutes: React.FC = () => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
       </div>
-    </header>
-  )
-}
+    );
+  }
 
-function Home() {
-  return (
-    <main style={{padding:16}}>
-      <h1>EduOrg</h1>
-      <p>Manage users, roles, permissions, and events with AI assistance.</p>
-    </main>
-  )
-}
-
-function AppRoutes(){
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/admin" element={<AdminPage />} />
-      <Route path="/events" element={<EventsPage />} />
-      <Route path="/chat" element={<ChatPage />} />
+      <Route 
+        path="/login" 
+        element={user ? <Navigate to="/" replace /> : <Login />} 
+      />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/events"
+        element={
+          <ProtectedRoute requiredPermission="view_events">
+            <Events />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  )
-}
+  );
+};
 
-export default function App(){
+function App() {
   return (
-    <AuthProvider>
-      <NavBar />
-      <AppRoutes />
-    </AuthProvider>
-  )
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            <AppRoutes />
+          </div>
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
 }
 
+export default App;
