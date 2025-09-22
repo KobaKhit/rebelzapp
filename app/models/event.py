@@ -25,4 +25,5 @@ class Event(Base):
 	created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 	updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
-	creator = relationship("User")
+	creator = relationship("User", foreign_keys=[created_by_user_id])
+	registrations = relationship("EventRegistration", back_populates="event", cascade="all, delete-orphan")
