@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 from starlette.staticfiles import StaticFiles
+import os
 
 from app.core.config import get_settings
 from app.db.database import Base, engine
@@ -40,6 +41,16 @@ app.include_router(ai_router.router, prefix="/ai", tags=["ai"])
 
 # Serve static UI
 app.mount("/ui", StaticFiles(directory="app/ui", html=True), name="ui")
+
+# Optionally serve built Vite frontend if present
+try:
+	frontend_dist = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
+	frontend_dist = os.path.abspath(frontend_dist)
+	if os.path.isdir(frontend_dist):
+		app.mount("/app", StaticFiles(directory=frontend_dist, html=True), name="app")
+except Exception:
+	# Non-fatal if not present in development
+	pass
 
 
 @app.get("/health")

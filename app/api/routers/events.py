@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
@@ -40,6 +40,12 @@ def get_event_types_by_category(category: str):
 		return event_registry.get_types_by_category(cat_enum)
 	except ValueError:
 		raise HTTPException(status_code=400, detail=f"Invalid category: {category}")
+
+
+@router.get("/type_schemas", response_model=Dict[str, Any])
+def list_event_type_schemas() -> Dict[str, Any]:
+	# For backward compatibility with the original implementation
+	return event_registry.list_type_schemas() if hasattr(event_registry, 'list_type_schemas') else {}
 
 
 @router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_permissions("manage_events"))])
