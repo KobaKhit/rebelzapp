@@ -13,6 +13,7 @@ from app.api.routers import users as users_router
 from app.api.routers import roles as roles_router
 from app.api.routers import permissions as permissions_router
 from app.api.routers import events as events_router
+from app.api.routers import registrations as registrations_router
 from app.api.routers import ai as ai_router
 
 
@@ -34,6 +35,7 @@ app.include_router(users_router.router, prefix="/users", tags=["users"])
 app.include_router(roles_router.router, prefix="/roles", tags=["roles"])
 app.include_router(permissions_router.router, prefix="/permissions", tags=["permissions"]) 
 app.include_router(events_router.router, prefix="/events", tags=["events"]) 
+app.include_router(registrations_router.router, prefix="/registrations", tags=["registrations"])
 app.include_router(ai_router.router, prefix="/ai", tags=["ai"]) 
 
 # Serve static UI

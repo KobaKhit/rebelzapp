@@ -21,6 +21,27 @@ def list_event_types() -> Dict[str, str]:
 	return event_registry.list_types()
 
 
+@router.get("/types/detailed")
+def list_event_types_detailed():
+	return event_registry.list_types_detailed()
+
+
+@router.get("/types/categories")
+def list_event_categories():
+	from app.services.event_registry import EventCategory
+	return {category.value: category.value.replace('_', ' ').title() for category in EventCategory}
+
+
+@router.get("/types/category/{category}")
+def get_event_types_by_category(category: str):
+	from app.services.event_registry import EventCategory
+	try:
+		cat_enum = EventCategory(category)
+		return event_registry.get_types_by_category(cat_enum)
+	except ValueError:
+		raise HTTPException(status_code=400, detail=f"Invalid category: {category}")
+
+
 @router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_permissions("manage_events"))])
 def create_event(payload: EventCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> EventRead:
 	schema = event_registry.get_schema(payload.type)
