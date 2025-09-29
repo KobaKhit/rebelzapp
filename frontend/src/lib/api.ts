@@ -5,14 +5,15 @@ import type {
   Permission,
   Event,
   EventCreate,
-  UserCreate,
-  UserUpdate,
+  EventUpdate,
   RoleCreate,
   PermissionCreate,
-  Token,
   ChatMessage,
   EventTypes,
+  Registration,
+  RegistrationCreate,
 } from '../types';
+import type { UserCreate, UserUpdate, Token } from '../types/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -77,6 +78,11 @@ export const usersApi = {
     return response.data;
   },
 
+  createUser: async (userData: UserCreate): Promise<User> => {
+    const response = await api.post<User>('/users/', userData);
+    return response.data;
+  },
+
   updateUser: async (id: number, userData: UserUpdate): Promise<User> => {
     const response = await api.patch<User>(`/users/${id}`, userData);
     return response.data;
@@ -84,6 +90,21 @@ export const usersApi = {
 
   setUserRoles: async (id: number, roles: string[]): Promise<User> => {
     const response = await api.post<User>(`/users/${id}/roles`, roles);
+    return response.data;
+  },
+
+  deleteUser: async (id: number): Promise<void> => {
+    await api.delete(`/users/${id}`);
+  },
+
+  uploadProfilePicture: async (file: File): Promise<User> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post<User>('/users/upload-profile-picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 };
@@ -155,7 +176,7 @@ export const eventsApi = {
     return response.data;
   },
 
-  updateEvent: async (id: number, eventData: Partial<EventCreate>): Promise<Event> => {
+  updateEvent: async (id: number, eventData: EventUpdate): Promise<Event> => {
     const response = await api.patch<Event>(`/events/${id}`, eventData);
     return response.data;
   },
@@ -185,6 +206,134 @@ export const aiApi = {
   getHelpTopics: async (): Promise<any[]> => {
     const response = await api.get<any[]>('/ai/help/topics');
     return response.data;
+  },
+};
+
+// Registrations API
+export const registrationsApi = {
+  getMyRegistrations: async (): Promise<Registration[]> => {
+    const response = await api.get<Registration[]>('/registrations/my');
+    return response.data;
+  },
+
+  registerForEvent: async (eventId: number, registrationData: Omit<RegistrationCreate, 'event_id'>): Promise<Registration> => {
+    const response = await api.post<Registration>('/registrations/', {
+      event_id: eventId,
+      ...registrationData
+    });
+    return response.data;
+  },
+
+  updateRegistration: async (id: number, updates: Partial<RegistrationCreate>): Promise<Registration> => {
+    const response = await api.patch<Registration>(`/registrations/${id}`, updates);
+    return response.data;
+  },
+
+  cancelRegistration: async (id: number): Promise<void> => {
+    await api.delete(`/registrations/${id}`);
+  },
+};
+
+// Chat API
+export const chatApi = {
+  // Groups
+  getGroups: async (): Promise<any[]> => {
+    const response = await api.get('/chat/groups');
+    return response.data;
+  },
+
+  getGroup: async (id: number): Promise<any> => {
+    const response = await api.get(`/chat/groups/${id}`);
+    return response.data;
+  },
+
+  createGroup: async (groupData: { name: string; description?: string; is_private: boolean }): Promise<any> => {
+    const response = await api.post('/chat/groups', groupData);
+    return response.data;
+  },
+
+  updateGroup: async (id: number, groupData: { name?: string; description?: string; is_private?: boolean }): Promise<any> => {
+    const response = await api.put(`/chat/groups/${id}`, groupData);
+    return response.data;
+  },
+
+  deleteGroup: async (id: number): Promise<void> => {
+    await api.delete(`/chat/groups/${id}`);
+  },
+
+  searchPublicGroups: async (query: string): Promise<any[]> => {
+    const response = await api.get(`/chat/search/groups?q=${encodeURIComponent(query)}`);
+    return response.data;
+  },
+
+  joinGroup: async (id: number): Promise<void> => {
+    await api.post(`/chat/groups/${id}/join`);
+  },
+
+  // Members
+  addMember: async (groupId: number, userId: number, isAdmin: boolean = false): Promise<void> => {
+    await api.post(`/chat/groups/${groupId}/members`, { user_id: userId, is_admin: isAdmin });
+  },
+
+  removeMember: async (groupId: number, userId: number): Promise<void> => {
+    await api.delete(`/chat/groups/${groupId}/members/${userId}`);
+  },
+
+  // Messages
+  getMessages: async (groupId: number, skip: number = 0, limit: number = 50): Promise<any[]> => {
+    const response = await api.get(`/chat/groups/${groupId}/messages?skip=${skip}&limit=${limit}`);
+    return response.data;
+  },
+
+  sendMessage: async (groupId: number, content: string, messageType: string = 'text'): Promise<any> => {
+    const response = await api.post(`/chat/groups/${groupId}/messages`, {
+      group_id: groupId,
+      content,
+      message_type: messageType
+    });
+    return response.data;
+  },
+};
+
+// Admin Chat API
+export const adminChatApi = {
+  // Admin/Instructor managed groups
+  createManagedGroup: async (groupData: { 
+    name: string; 
+    description?: string; 
+    is_private: boolean; 
+    group_type: 'admin_managed' | 'instructor_managed';
+    member_ids: number[];
+  }): Promise<any> => {
+    const response = await api.post('/chat/admin/groups', groupData);
+    return response.data;
+  },
+
+  getManagedGroups: async (): Promise<any[]> => {
+    const response = await api.get('/chat/admin/groups');
+    return response.data;
+  },
+
+  getAllManagedGroups: async (): Promise<any[]> => {
+    const response = await api.get('/chat/admin/groups/all');
+    return response.data;
+  },
+
+  updateManagedGroup: async (id: number, groupData: { name?: string; description?: string; is_private?: boolean }): Promise<any> => {
+    const response = await api.put(`/chat/admin/groups/${id}`, groupData);
+    return response.data;
+  },
+
+  deleteManagedGroup: async (id: number): Promise<void> => {
+    await api.delete(`/chat/admin/groups/${id}`);
+  },
+
+  assignUserToGroup: async (groupId: number, userId: number): Promise<void> => {
+    await api.post(`/chat/admin/groups/${groupId}/members/${userId}`);
+  },
+
+  removeUserFromGroup: async (groupId: number, userId: number): Promise<void> => {
+    await api.delete(`/chat/admin/groups/${groupId}/members/${userId}`);
   },
 };
 

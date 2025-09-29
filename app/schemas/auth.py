@@ -29,6 +29,12 @@ class ChatRequest(BaseModel):
 	messages: list[Message]
 
 
+class Choice(BaseModel):
+	message: Message
+	finish_reason: Optional[str] = None
+	index: int = 0
+
+
 class ChatResponse(BaseModel):
 	model: str
-	choices: list[dict]
+	choices: list[Choice]

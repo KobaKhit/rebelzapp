@@ -16,6 +16,7 @@ class User(Base):
 	email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
 	full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
 	password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+	profile_picture: Mapped[str | None] = mapped_column(String(500), nullable=True)
 	is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 	created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 	updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

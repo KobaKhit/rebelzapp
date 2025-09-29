@@ -11,7 +11,13 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+try:
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    # Test bcrypt functionality
+    pwd_context.hash("test")
+except Exception:
+    # Fallback to pbkdf2_sha256 if bcrypt fails
+    pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 ALGORITHM = "HS256"
 
 
