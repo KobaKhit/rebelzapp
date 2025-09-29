@@ -113,11 +113,31 @@ docker-compose logs -f app
    - Go to [Digital Ocean App Platform](https://cloud.digitalocean.com/apps)
    - Click "Create App"
    - Connect your GitHub repository
-   - Select "Docker Compose" as deployment method
-   - Set environment variables in the dashboard (copy from your `.env`)
+   - **IMPORTANT**: Choose "Use existing app spec" and it will detect `.do/app.yaml`
+   - Or manually select "Dockerfile" deployment method (not Docker Compose)
+   - Set these environment variables in the dashboard:
+     - `SECRET_KEY` (generate with: `openssl rand -hex 32`)
+     - `ALLOWED_ORIGINS` (your domain, e.g., `https://rebelz-app.ondigitalocean.app`)
+     - `POSTGRES_PASSWORD` (strong password)
+     - `REDIS_PASSWORD` (strong password)
+     - `OPENAI_API_KEY` (optional)
    - Deploy!
 
 **Estimated Cost:** $12-15/month (cheaper with unified approach!)
+
+### 🚨 **Digital Ocean Troubleshooting**
+
+**Problem**: Digital Ocean shows two web services (ports 80 and 8080)?
+
+**Solution**: This happens when DO auto-detects both frontend and backend as separate services.
+
+**Fix**:
+1. **Delete the existing app** in Digital Ocean dashboard
+2. **Re-create** and choose **"Use existing app spec"** (it will find `.do/app.yaml`)
+3. Or manually select **"Dockerfile"** (not "Docker Compose")
+4. Make sure you see only **ONE** web service in the configuration
+
+The `.do/app.yaml` file tells Digital Ocean to use our unified container instead of auto-detecting separate services.
 
 #### Option B: Droplet Deployment (More Control)
 

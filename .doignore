@@ -1,0 +1,24 @@
+# Digital Ocean ignore file
+# Prevents auto-detection of separate services
+
+# Don't treat frontend as separate Node.js app
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Don't auto-detect these as separate services
+*.pyc
+__pycache__/
+.git/
+.env
+.env.local
+app.db
+
+# Development files
+docker-compose.dev.yml
+scripts/dev-setup.sh
+DEVELOPMENT_SUMMARY.md
+
+# Documentation (not needed for deployment)
+*.md
+!README.md
