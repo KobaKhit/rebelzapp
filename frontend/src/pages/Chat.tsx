@@ -153,12 +153,21 @@ const Chat: React.FC = () => {
     },
   });
 
+  // Helper function to get WebSocket URL
+  const getWebSocketUrl = (groupId: number, token: string) => {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    // Convert HTTP/HTTPS URL to WebSocket URL
+    const wsBaseUrl = apiBaseUrl.replace(/^https?:\/\//, '').replace(/^http:\/\//, '');
+    const protocol = apiBaseUrl.startsWith('https://') ? 'wss://' : 'ws://';
+    return `${protocol}${wsBaseUrl}/ws/chat/${groupId}?token=${token}`;
+  };
+
   // WebSocket connection
   useEffect(() => {
     if (selectedGroup && user) {
       const token = localStorage.getItem('token');
       if (token) {
-        const wsUrl = `ws://localhost:8000/ws/chat/${selectedGroup.id}?token=${token}`;
+        const wsUrl = getWebSocketUrl(selectedGroup.id, token);
         const websocket = new WebSocket(wsUrl);
 
         websocket.onopen = () => {
