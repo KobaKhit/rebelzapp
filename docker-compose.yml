@@ -10,7 +10,7 @@ services:
       dockerfile: Dockerfile
       # Enable BuildKit for faster builds and caching
       cache_from:
-        - ghcr.io/astral-sh/uv:python3.11-slim
+        - ghcr.io/astral-sh/uv:python3.11-bookworm-slim
         - node:18-alpine
     ports:
       - "80:80"

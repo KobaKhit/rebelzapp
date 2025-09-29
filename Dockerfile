@@ -22,7 +22,7 @@ RUN npm run build
 RUN npm prune --production
 
 # Stage 2: Main Application
-FROM ghcr.io/astral-sh/uv:python3.11-slim
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
