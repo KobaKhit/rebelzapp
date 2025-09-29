@@ -1,32 +1,40 @@
-# 🚀 Digital Ocean Deployment Guide
+# 🚀 Rebelz App Deployment Guide
 
-This guide will help you deploy the Rebelz app to Digital Ocean with production-grade security.
+Deploy your full-stack Rebelz app with a **single unified container** - the simplest way to get to production!
 
-## 🔒 Security Features Included
+## ✨ **Unified Deployment Benefits**
 
-- ✅ **Rate Limiting**: Redis-backed API rate limiting (100 req/min default)
+- 🏗️ **Single Container**: Frontend + Backend + Nginx in one container
+- 🚀 **Simpler Setup**: No need to coordinate multiple services
+- 💰 **Lower Cost**: Uses fewer resources on hosting platforms
+- 🔧 **Easier Management**: One container to manage instead of three
+- 🌐 **No CORS Issues**: Frontend and API served from same domain
+
+## 🔒 **Security Features Included**
+
+- ✅ **Rate Limiting**: Redis-backed API protection (100 req/min default)
 - ✅ **Security Headers**: XSS protection, CSRF prevention, CSP
 - ✅ **Authentication**: JWT with bcrypt password hashing
 - ✅ **Authorization**: Role-based permissions system
 - ✅ **Database**: PostgreSQL with secure configuration
-- ✅ **CORS**: Configurable origin restrictions
 - ✅ **File Upload**: Size limits and type validation
-- ✅ **Request Logging**: Suspicious activity monitoring
+- ✅ **Request Monitoring**: Suspicious activity detection
 - ✅ **API Documentation**: Disabled in production
 
-## 📋 Pre-Deployment Security Checklist
+## 📦 **What's Included**
+
+The unified container includes:
+- **React Frontend** (built and served by Nginx)
+- **FastAPI Backend** (Python API server)
+- **Nginx Reverse Proxy** (routes requests appropriately)
+- **All Security Features** (rate limiting, headers, etc.)
+
+## 📋 **Pre-Deployment Security Checklist**
 
 Run the security validation script:
 ```bash
 python scripts/security-check.py
 ```
-
-All production configurations have been prepared:
-- ✅ Production `docker-compose.yml` with Redis
-- ✅ Security middleware and rate limiting
-- ✅ Environment template (`env.example`)
-- ✅ PostgreSQL configuration
-- ✅ Network isolation
 
 ## 🔧 Setup Instructions
 
@@ -69,14 +77,35 @@ All production configurations have been prepared:
    - `DEBUG=false` - **MUST be false**
    - `ENABLE_DOCS=false` - **MUST be false for security**
 
-### 2. Digital Ocean Deployment Options
+### 2. Quick Deployment
+
+#### **One-Command Deployment**
+```bash
+# Run the automated deployment script
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+```
+
+#### **Manual Deployment**
+```bash
+# Build and start everything
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f app
+```
+
+### 3. Digital Ocean Deployment Options
 
 #### Option A: App Platform (Recommended - Easiest)
 
 1. **Push to GitHub:**
    ```bash
    git add .
-   git commit -m "Add production configuration"
+   git commit -m "Ready for production deployment"
    git push origin main
    ```
 
@@ -88,7 +117,7 @@ All production configurations have been prepared:
    - Set environment variables in the dashboard (copy from your `.env`)
    - Deploy!
 
-**Estimated Cost:** $12-25/month
+**Estimated Cost:** $12-15/month (cheaper with unified approach!)
 
 #### Option B: Droplet Deployment (More Control)
 

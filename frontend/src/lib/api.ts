@@ -17,8 +17,12 @@ import type { UserCreate, UserUpdate, Token } from '../types/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
+// For unified deployment, use /api prefix when served from same domain
+const isUnifiedDeployment = !import.meta.env.VITE_API_BASE_URL || 
+  import.meta.env.VITE_API_BASE_URL === window.location.origin;
+
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: isUnifiedDeployment ? '/api' : API_BASE_URL,
 });
 
 // Request interceptor to add auth token
