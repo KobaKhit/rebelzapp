@@ -1,6 +1,6 @@
-# EduOrg - Educational Organization Management Platform
+# 🎓 Rebelz App - Educational Organization Management Platform
 
-A comprehensive platform for managing educational organizations with modern web technologies, featuring FastAPI backend and React frontend with LLM integration.
+A comprehensive full-stack platform for managing educational organizations with modern web technologies, featuring unified deployment, enterprise security, and AI integration.
 
 ## 🚀 Features
 
@@ -27,26 +27,39 @@ A comprehensive platform for managing educational organizations with modern web 
 - **Student**: Event registration and profile management
 
 ### Technology Stack
-- **Backend**: FastAPI, SQLAlchemy, PostgreSQL/SQLite, JWT authentication
-- **Frontend**: React, TypeScript, Tailwind CSS, React Query
+- **Backend**: FastAPI, SQLAlchemy, PostgreSQL, JWT authentication
+- **Frontend**: React, TypeScript, Tailwind CSS, React Query  
 - **AI**: OpenAI API integration with fallback stub responses
-- **DevOps**: Docker, Docker Compose, Alembic migrations
+- **Security**: Rate limiting, security headers, request monitoring
+- **DevOps**: Unified Docker container, PostgreSQL, Redis
+- **Deployment**: Single container with Nginx reverse proxy
 
-## 🛠️ Quick Start
+## ✨ **Unified Deployment Benefits**
 
-### Option 1: Automated Setup (Recommended)
+- 🏗️ **Single Container**: Frontend + Backend + Nginx in one container
+- 🚀 **Simpler Setup**: No need to coordinate multiple services
+- 💰 **Lower Cost**: Uses fewer resources on hosting platforms
+- 🔧 **Easier Management**: One container to manage instead of three
+- 🌐 **No CORS Issues**: Frontend and API served from same domain
+- 🔒 **Enterprise Security**: Rate limiting, headers, monitoring included
+
+## 🚀 Quick Start
+
+### **Unified Deployment (Recommended)**
 ```bash
-# Clone and setup
+# Clone the repository
 git clone <repository-url>
-cd eduorg
-chmod +x scripts/dev-setup.sh
-./scripts/dev-setup.sh
+cd rebelzapp
 
-# Start backend
-uvicorn app.main:app --reload --port 8000
+# Setup environment
+cp env.example .env
+# Edit .env with your secure values
 
-# Start frontend (in another terminal)
-cd frontend && npm run dev
+# One-command deployment
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+
+# Access your app at http://localhost
 ```
 
 ### Option 2: Manual Setup
