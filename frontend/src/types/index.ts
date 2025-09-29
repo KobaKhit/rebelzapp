@@ -106,18 +106,4 @@ export interface RegistrationCreate {
   special_needs?: string;
 }
 
-// Re-export all interfaces to ensure they're available
-export type {
-  User,
-  Role,
-  RoleCreate,
-  Permission,
-  PermissionCreate,
-  Event,
-  EventCreate,
-  EventUpdate,
-  EventTypes,
-  ChatMessage,
-  Registration,
-  RegistrationCreate,
-};
+// Types are already exported above - no need to re-export

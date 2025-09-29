@@ -195,6 +195,7 @@ const ConsumerDashboard: React.FC = () => {
                 
                 <div className="space-y-4">
                   {myUpcomingEvents.map((registration) => {
+                    if (!registration) return null;
                     const event = registration.event;
                     const EventIcon = getEventIcon(event.type);
                     

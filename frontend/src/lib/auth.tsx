@@ -92,13 +92,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const authFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
-    const headers = {
+    const headers = new Headers({
       'Content-Type': 'application/json',
-      ...options.headers,
-    };
+      ...options.headers as Record<string, string>,
+    });
 
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers.set('Authorization', `Bearer ${token}`);
     }
 
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}${url}`, {
