@@ -139,6 +139,10 @@ docker-compose logs -f app
 
 The `.do/app.yaml` file tells Digital Ocean to use our unified container instead of auto-detecting separate services.
 
+**Problem**: Build fails with "tsc: not found" or TypeScript errors?
+
+**Solution**: This was fixed in the Dockerfile - make sure you have the latest version that uses `npm ci` (not `npm ci --only=production`) to install dev dependencies needed for the build.
+
 #### Option B: Droplet Deployment (More Control)
 
 1. **Create Droplet:**
