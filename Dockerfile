@@ -98,6 +98,7 @@ RUN adduser --disabled-password --gecos '' appuser && \
     chown -R appuser:appuser /app && \
     chown -R appuser:appuser /var/log/nginx && \
     chown -R appuser:appuser /var/lib/nginx && \
+    mkdir -p /var/run && \
     touch /var/run/nginx.pid && \
     chown appuser:appuser /var/run/nginx.pid
 
