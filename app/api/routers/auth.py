@@ -23,6 +23,7 @@ def user_to_read(user: User) -> UserRead:
 		id=user.id,
 		email=user.email,
 		full_name=user.full_name,
+		profile_picture=user.profile_picture,
 		is_active=user.is_active,
 		roles=[r.name for r in user.roles],
 	)

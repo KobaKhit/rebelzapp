@@ -51,8 +51,15 @@ const EventDetails: React.FC = () => {
 
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', id],
-    queryFn: () => eventsApi.getEvent(Number(id)),
-    enabled: !!id,
+    queryFn: () => {
+      const numId = Number(id);
+      if (isNaN(numId)) {
+        console.error('Invalid event ID:', id);
+        throw new Error('Invalid event ID');
+      }
+      return eventsApi.getEvent(numId);
+    },
+    enabled: !!id && !isNaN(Number(id)),
   });
 
   const { data: myRegistrations = [], error: registrationsError } = useQuery({

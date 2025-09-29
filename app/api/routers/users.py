@@ -1,19 +1,21 @@
 from __future__ import annotations
 
+import os
+import uuid
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
 from sqlalchemy import select, or_, and_
 from sqlalchemy.orm import Session
 
-from app.api.deps import require_permissions
+from app.api.deps import require_permissions, get_current_user
 from app.db.database import get_db
 from app.models import Role, User
 from app.schemas.user import UserRead, UserUpdate, UserCreate
 from app.services.security import hash_password
 
 
-router = APIRouter(dependencies=[Depends(require_permissions("manage_users"))])
+router = APIRouter()
 
 
 def user_to_read(user: User) -> UserRead:
@@ -21,12 +23,13 @@ def user_to_read(user: User) -> UserRead:
 		id=user.id,
 		email=user.email,
 		full_name=user.full_name,
+		profile_picture=user.profile_picture,
 		is_active=user.is_active,
 		roles=[r.name for r in user.roles],
 	)
 
 
-@router.get("/", response_model=List[UserRead])
+@router.get("/", response_model=List[UserRead], dependencies=[Depends(require_permissions("manage_users"))])
 def list_users(
 	db: Session = Depends(get_db),
 	search: Optional[str] = Query(None, description="Search by email or full name"),
@@ -63,7 +66,7 @@ def list_users(
 	return [user_to_read(u) for u in users]
 
 
-@router.get("/{user_id}", response_model=UserRead)
+@router.get("/{user_id}", response_model=UserRead, dependencies=[Depends(require_permissions("manage_users"))])
 def get_user(user_id: int, db: Session = Depends(get_db)) -> UserRead:
 	user = db.get(User, user_id)
 	if not user:
@@ -71,7 +74,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)) -> UserRead:
 	return user_to_read(user)
 
 
-@router.patch("/{user_id}", response_model=UserRead)
+@router.patch("/{user_id}", response_model=UserRead, dependencies=[Depends(require_permissions("manage_users"))])
 def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)) -> UserRead:
 	user = db.get(User, user_id)
 	if not user:
@@ -80,6 +83,8 @@ def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)
 		user.full_name = payload.full_name
 	if payload.password is not None:
 		user.password_hash = hash_password(payload.password)
+	if payload.profile_picture is not None:
+		user.profile_picture = payload.profile_picture
 	if payload.is_active is not None:
 		user.is_active = payload.is_active
 	db.add(user)
@@ -88,7 +93,7 @@ def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)
 	return user_to_read(user)
 
 
-@router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_permissions("manage_users"))])
 def create_user(payload: UserCreate, db: Session = Depends(get_db)) -> UserRead:
 	# Check if email already exists
 	existing = db.execute(select(User).where(User.email == payload.email)).scalar_one_or_none()
@@ -106,7 +111,7 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)) -> UserRead:
 	return user_to_read(user)
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_permissions("manage_users"))])
 def delete_user(user_id: int, db: Session = Depends(get_db)):
 	user = db.get(User, user_id)
 	if not user:
@@ -115,7 +120,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 	db.commit()
 
 
-@router.post("/{user_id}/roles", response_model=UserRead)
+@router.post("/{user_id}/roles", response_model=UserRead, dependencies=[Depends(require_permissions("manage_users"))])
 def set_user_roles(user_id: int, roles: List[str], db: Session = Depends(get_db)) -> UserRead:
 	user = db.get(User, user_id)
 	if not user:
@@ -128,7 +133,52 @@ def set_user_roles(user_id: int, roles: List[str], db: Session = Depends(get_db)
 	return user_to_read(user)
 
 
-@router.get("/stats/summary")
+@router.post("/upload-profile-picture", response_model=UserRead)
+async def upload_profile_picture(
+	file: UploadFile = File(...),
+	current_user: User = Depends(get_current_user),
+	db: Session = Depends(get_db)
+) -> UserRead:
+	"""Upload profile picture for the current user"""
+	
+	# Validate file type
+	if not file.content_type or not file.content_type.startswith('image/'):
+		raise HTTPException(status_code=400, detail="File must be an image")
+	
+	# Validate file size using settings
+	from app.core.config import get_settings
+	settings = get_settings()
+	if file.size and file.size > settings.max_file_size:
+		max_mb = settings.max_file_size / (1024 * 1024)
+		raise HTTPException(status_code=400, detail=f"File size must be less than {max_mb:.1f}MB")
+	
+	# Create uploads directory if it doesn't exist
+	upload_dir = "uploads/profile_pictures"
+	os.makedirs(upload_dir, exist_ok=True)
+	
+	# Generate unique filename
+	file_extension = file.filename.split('.')[-1] if file.filename else 'jpg'
+	filename = f"{uuid.uuid4()}.{file_extension}"
+	file_path = os.path.join(upload_dir, filename)
+	
+	# Save file
+	try:
+		with open(file_path, "wb") as buffer:
+			content = await file.read()
+			buffer.write(content)
+	except Exception as e:
+		raise HTTPException(status_code=500, detail="Failed to save file")
+	
+	# Update user profile picture path
+	current_user.profile_picture = f"/uploads/profile_pictures/{filename}"
+	db.add(current_user)
+	db.commit()
+	db.refresh(current_user)
+	
+	return user_to_read(current_user)
+
+
+@router.get("/stats/summary", dependencies=[Depends(require_permissions("manage_users"))])
 def get_user_stats(db: Session = Depends(get_db)):
 	"""Get user statistics summary"""
 	total_users = db.execute(select(User)).scalars().all()

@@ -8,6 +8,7 @@ export interface UserCreate {
 export interface UserUpdate {
   full_name?: string;
   password?: string;
+  profile_picture?: string;
   is_active?: boolean;
 }
 

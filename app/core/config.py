@@ -23,6 +23,19 @@ class Settings(BaseModel):
 	allowed_origins: List[str] = Field(default_factory=lambda: [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "*").split(",") if o.strip()])
 	openai_api_key: Optional[str] = Field(default=os.getenv("OPENAI_API_KEY"))
 	model_name: str = Field(default=os.getenv("MODEL_NAME", "gpt-4o-mini"))
+	
+	# Security settings
+	max_file_size: int = Field(default=int(os.getenv("MAX_FILE_SIZE", "5242880")))  # 5MB default
+	rate_limit_calls: int = Field(default=int(os.getenv("RATE_LIMIT_CALLS", "100")))
+	rate_limit_period: int = Field(default=int(os.getenv("RATE_LIMIT_PERIOD", "60")))
+	enable_docs: bool = Field(default=os.getenv("ENABLE_DOCS", "true" if os.getenv("ENV", "development") == "development" else "false").lower() == "true")
+	
+	# Redis settings for production rate limiting
+	redis_url: Optional[str] = Field(default=os.getenv("REDIS_URL"))
+	
+	@property
+	def is_production(self) -> bool:
+		return self.env == "production"
 
 
 @lru_cache(maxsize=1)

@@ -79,19 +79,47 @@ async def get_help_topics() -> List[dict]:
 
 # Server-Sent Events endpoint for AG-UI
 @router.get("/events")
-async def ag_ui_events(token: str = None):
+async def ag_ui_events(
+	token: str = None,
+	db: Session = Depends(get_db)
+):
 	"""Server-Sent Events stream for AG-UI communication"""
-	# Optional: Validate token here if needed
-	# For now, we'll allow the connection but you could add auth validation
+	# Validate token if provided
+	current_user = None
+	if token:
+		try:
+			from app.services.security import decode_access_token
+			from app.models import User
+			payload = decode_access_token(token)
+			user_id = payload.get("sub")
+			if user_id:
+				current_user = db.get(User, int(user_id))
+		except Exception as e:
+			print(f"Token validation error in SSE: {e}")
+			# Continue without user context for now
 	
 	async def event_stream():
-		# Send initial connection event
-		yield f"data: {json.dumps({'type': 'connection', 'data': {'status': 'connected'}})}\n\n"
-		
-		# Keep connection alive
-		while True:
-			await asyncio.sleep(30)  # Send heartbeat every 30 seconds
-			yield f"data: {json.dumps({'type': 'heartbeat', 'data': {'timestamp': 'now'}})}\n\n"
+		try:
+			# Send initial connection event
+			connection_data = {'type': 'connection', 'data': {'status': 'connected'}}
+			if current_user:
+				connection_data['data']['user'] = current_user.email
+			yield f"data: {json.dumps(connection_data)}\n\n"
+			
+			# Keep connection alive with heartbeat
+			while True:
+				await asyncio.sleep(30)  # Send heartbeat every 30 seconds
+				heartbeat_data = {
+					'type': 'heartbeat', 
+					'data': {
+						'timestamp': 'now',
+						'authenticated': current_user is not None
+					}
+				}
+				yield f"data: {json.dumps(heartbeat_data)}\n\n"
+		except Exception as e:
+			print(f"Event stream error: {e}")
+			yield f"data: {json.dumps({'type': 'error', 'data': {'message': 'Stream error'}})}\n\n"
 	
 	return StreamingResponse(
 		event_stream(),
@@ -100,7 +128,7 @@ async def ag_ui_events(token: str = None):
 			"Cache-Control": "no-cache",
 			"Connection": "keep-alive",
 			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Headers": "Cache-Control"
+			"Access-Control-Allow-Headers": "Cache-Control, Authorization"
 		}
 	)
 

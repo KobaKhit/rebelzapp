@@ -29,7 +29,7 @@ interface ProfileFormData {
 }
 
 const UserProfile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const queryClient = useQueryClient();
   
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'achievements' | 'settings'>('overview');
@@ -54,9 +54,24 @@ const UserProfile: React.FC = () => {
   const updateProfileMutation = useMutation({
     mutationFn: (data: ProfileFormData) => 
       usersApi.updateUser(user!.id, data),
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Refresh the user data in auth context to update profile immediately
+      await refreshUser();
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       setIsEditing(false);
+    },
+  });
+
+  const uploadProfilePictureMutation = useMutation({
+    mutationFn: (file: File) => usersApi.uploadProfilePicture(file),
+    onSuccess: async () => {
+      // Refresh the user data in auth context to update profile picture immediately
+      await refreshUser();
+      // Also invalidate queries for other components that might use user data
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    },
+    onError: (error) => {
+      console.error('Failed to upload profile picture:', error);
     },
   });
 
@@ -115,6 +130,25 @@ const UserProfile: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfilePictureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      
+      uploadProfilePictureMutation.mutate(file);
+    }
   };
 
   const tabs = [
@@ -194,12 +228,32 @@ const UserProfile: React.FC = () => {
           <div className="relative z-10 flex items-start justify-between">
             <div className="flex items-center space-x-6">
               <div className="relative">
-                <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                  <UserCircleIcon className="w-16 h-16" />
+                <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center overflow-hidden">
+                  {user?.profile_picture ? (
+                    <img 
+                      src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}${user.profile_picture}`}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <UserCircleIcon className="w-16 h-16" />
+                  )}
                 </div>
-                <button className="absolute bottom-0 right-0 w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all">
+                <label className="absolute bottom-0 right-0 w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all cursor-pointer">
                   <CameraIcon className="w-4 h-4" />
-                </button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePictureUpload}
+                    className="hidden"
+                    disabled={uploadProfilePictureMutation.isPending}
+                  />
+                </label>
+                {uploadProfilePictureMutation.isPending && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  </div>
+                )}
               </div>
               
               <div>
@@ -510,6 +564,40 @@ const UserProfile: React.FC = () => {
             {activeTab === 'settings' && (
               <div className="space-y-6">
                 <h3 className="text-xl font-semibold text-gray-900">Profile Settings</h3>
+                
+                {/* Profile Picture Section */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Profile Picture</h4>
+                  <div className="flex items-center space-x-6">
+                    <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                      {user?.profile_picture ? (
+                        <img 
+                          src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}${user.profile_picture}`}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <UserCircleIcon className="w-12 h-12 text-gray-400" />
+                      )}
+                    </div>
+                    <div>
+                      <label className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+                        <CameraIcon className="w-4 h-4 mr-2" />
+                        {uploadProfilePictureMutation.isPending ? 'Uploading...' : 'Change Picture'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProfilePictureUpload}
+                          className="hidden"
+                          disabled={uploadProfilePictureMutation.isPending}
+                        />
+                      </label>
+                      <p className="text-sm text-gray-500 mt-2">
+                        JPG, PNG or GIF. Max size 5MB.
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 
                 <form onSubmit={handleProfileUpdate} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

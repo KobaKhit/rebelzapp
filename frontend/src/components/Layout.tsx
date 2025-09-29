@@ -6,8 +6,8 @@ import {
   HomeIcon,
   CalendarIcon,
   UserGroupIcon,
-  ShieldCheckIcon,
   ChatBubbleBottomCenterTextIcon,
+  ChatBubbleLeftRightIcon,
   ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
   UserIcon,
@@ -37,7 +37,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'Home', href: '/', icon: HomeIcon, current: location.pathname === '/' },
     { name: 'Discover Events', href: '/discover', icon: MagnifyingGlassIcon, current: location.pathname.startsWith('/discover') },
     { name: 'My Profile', href: '/profile', icon: UserIcon, current: location.pathname.startsWith('/profile') || location.pathname.startsWith('/my-events') },
-    { name: 'AI Chat', href: '/chat', icon: ChatBubbleBottomCenterTextIcon, current: location.pathname === '/chat' },
+    { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon, current: location.pathname === '/chat' },
+    { name: 'AI Assistant', href: '/ai-chat', icon: ChatBubbleBottomCenterTextIcon, current: location.pathname === '/ai-chat' },
   ];
 
   // Admin navigation
@@ -45,26 +46,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'Dashboard', href: '/', icon: HomeIcon, current: location.pathname === '/' || location.pathname === '/admin' },
     { name: 'Events', href: '/admin/events', icon: CalendarIcon, current: location.pathname.startsWith('/events') || location.pathname.startsWith('/admin/events') },
     {
-      name: 'Users',
+      name: 'User Management',
       href: '/admin/users',
       icon: UserGroupIcon,
-      current: location.pathname.startsWith('/users') || location.pathname.startsWith('/admin/users'),
+      current: location.pathname.startsWith('/users') || location.pathname.startsWith('/admin/users') || location.pathname.startsWith('/admin/roles'),
       permission: 'manage_users' as const,
+      alternativePermission: 'manage_roles' as const,
     },
+    { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon, current: location.pathname === '/chat' },
     {
-      name: 'Roles & Permissions',
-      href: '/admin/roles',
-      icon: ShieldCheckIcon,
-      current: location.pathname.startsWith('/admin/roles'),
-      permission: 'manage_roles' as const,
+      name: 'Group Management',
+      href: '/admin/chat',
+      icon: UserGroupIcon,
+      current: location.pathname === '/admin/chat',
+      permission: 'manage_events' as const,
+      alternativePermission: 'manage_users' as const,
     },
-    { name: 'AI Chat', href: '/chat', icon: ChatBubbleBottomCenterTextIcon, current: location.pathname === '/chat' },
+    { name: 'AI Assistant', href: '/ai-chat', icon: ChatBubbleBottomCenterTextIcon, current: location.pathname === '/ai-chat' },
   ];
 
   const navigation = isAdmin ? adminNavigation : consumerNavigation;
-  const filteredNavigation = navigation.filter(item => 
-    !item.permission || hasPermission(item.permission)
-  );
+  const filteredNavigation = navigation.filter(item => {
+    const navItem = item as any;
+    return !navItem.permission || hasPermission(navItem.permission) || (navItem.alternativePermission && hasPermission(navItem.alternativePermission));
+  });
 
   return (
     <div className="min-h-full">

@@ -14,6 +14,8 @@ import Events from './pages/Events';
 import NewEvent from './pages/NewEvent';
 import EditEvent from './pages/EditEvent';
 import Chat from './pages/Chat';
+import AIChat from './pages/AIChat';
+import AdminChat from './pages/AdminChat';
 import AdminPage from './pages/AdminPage';
 
 const queryClient = new QueryClient({
@@ -129,18 +131,14 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/admin/users"
         element={
-          <ProtectedRoute requiredPermission="manage_users">
-            <AdminPage />
+          <ProtectedRoute>
+            {(hasPermission('manage_users') || hasPermission('manage_roles')) ? <AdminPage /> : <Navigate to="/" replace />}
           </ProtectedRoute>
         }
       />
       <Route
         path="/admin/roles"
-        element={
-          <ProtectedRoute requiredPermission="manage_roles">
-            <AdminPage />
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/admin/users" replace />}
       />
 
       {/* Legacy Routes for Compatibility */}
@@ -165,6 +163,22 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <Chat />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/chat"
+        element={
+          <ProtectedRoute>
+            {(hasPermission('manage_users') || hasPermission('manage_events')) ? <AdminChat /> : <Navigate to="/" replace />}
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-chat"
+        element={
+          <ProtectedRoute>
+            <AIChat />
           </ProtectedRoute>
         }
       />

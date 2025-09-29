@@ -7,6 +7,7 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
   hasPermission: (permission: string) => boolean;
   hasRole: (role: string) => boolean;
@@ -48,6 +49,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+  };
+
+  const refreshUser = async () => {
+    if (token) {
+      try {
+        const userData = await authApi.getCurrentUser();
+        setUser(userData);
+      } catch (error) {
+        console.error('Failed to refresh user data:', error);
+      }
+    }
   };
 
   const hasPermission = (permission: string): boolean => {
@@ -126,6 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     token,
     login,
     logout,
+    refreshUser,
     isLoading,
     hasPermission,
     hasRole,

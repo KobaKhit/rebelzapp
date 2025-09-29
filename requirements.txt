@@ -14,3 +14,5 @@ openai==1.46.0
 python-dotenv==1.0.1
 orjson==3.10.7
 pydantic-ai-slim[ag-ui]==0.0.14
+slowapi==0.1.9
+redis==5.1.1

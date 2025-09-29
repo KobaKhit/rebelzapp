@@ -1,15 +1,32 @@
 # 🚀 Digital Ocean Deployment Guide
 
-This guide will help you deploy the Rebelz app to Digital Ocean.
+This guide will help you deploy the Rebelz app to Digital Ocean with production-grade security.
 
-## 📋 Pre-Deployment Checklist
+## 🔒 Security Features Included
+
+- ✅ **Rate Limiting**: Redis-backed API rate limiting (100 req/min default)
+- ✅ **Security Headers**: XSS protection, CSRF prevention, CSP
+- ✅ **Authentication**: JWT with bcrypt password hashing
+- ✅ **Authorization**: Role-based permissions system
+- ✅ **Database**: PostgreSQL with secure configuration
+- ✅ **CORS**: Configurable origin restrictions
+- ✅ **File Upload**: Size limits and type validation
+- ✅ **Request Logging**: Suspicious activity monitoring
+- ✅ **API Documentation**: Disabled in production
+
+## 📋 Pre-Deployment Security Checklist
+
+Run the security validation script:
+```bash
+python scripts/security-check.py
+```
 
 All production configurations have been prepared:
-- ✅ Production `docker-compose.yml`
-- ✅ Production frontend `Dockerfile`
-- ✅ Nginx configuration
+- ✅ Production `docker-compose.yml` with Redis
+- ✅ Security middleware and rate limiting
 - ✅ Environment template (`env.example`)
-- ✅ Optimized backend Dockerfile
+- ✅ PostgreSQL configuration
+- ✅ Network isolation
 
 ## 🔧 Setup Instructions
 
@@ -25,19 +42,32 @@ All production configurations have been prepared:
    nano .env
    ```
 
-3. **IMPORTANT**: Generate a secure secret key:
+3. **IMPORTANT**: Generate secure credentials:
    ```bash
-   openssl rand -hex 32
+   # Run the security script to generate secure passwords
+   python scripts/security-check.py
    ```
-   Copy this output to your `SECRET_KEY` in `.env`
+   Or generate manually:
+   ```bash
+   # Secret key for JWT tokens
+   openssl rand -hex 32
+   
+   # Database password
+   openssl rand -base64 32
+   
+   # Redis password
+   openssl rand -base64 24
+   ```
 
-4. Update these values in your `.env`:
-   - `SECRET_KEY` - Use the generated key above
-   - `DATABASE_URL` - Keep as is for Docker setup
-   - `POSTGRES_PASSWORD` - Choose a strong password
-   - `ALLOWED_ORIGINS` - Your domain (e.g., `https://yourdomain.com`)
-   - `VITE_API_BASE_URL` - Your domain (e.g., `https://yourdomain.com`)
-   - `OPENAI_API_KEY` - Optional, for AI features
+4. Update these **CRITICAL** values in your `.env`:
+   - `SECRET_KEY` - Use generated key (32+ chars)
+   - `POSTGRES_PASSWORD` - Strong password
+   - `REDIS_PASSWORD` - Strong password
+   - `ALLOWED_ORIGINS` - **YOUR DOMAIN ONLY** (e.g., `https://yourdomain.com`)
+   - `VITE_API_BASE_URL` - Your API domain
+   - `ENV=production` - **MUST be set to production**
+   - `DEBUG=false` - **MUST be false**
+   - `ENABLE_DOCS=false` - **MUST be false for security**
 
 ### 2. Digital Ocean Deployment Options
 

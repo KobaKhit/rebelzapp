@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
+import { CopilotTextarea } from '@copilotkit/react-textarea';
 import AGUIEventCard from './AGUIEventCard';
+
 // Define AG-UI types since @ag-ui/core exports may vary
 interface AGUIMessage {
   role: 'user' | 'assistant';
@@ -14,10 +17,11 @@ interface AGUIEvent {
 
 type AGUIEventType = string;
 
-interface AGUIChatProps {
+interface EnhancedAGUIChatProps {
   endpoint: string;
   onMessage?: (message: AGUIMessage) => void;
   onEvent?: (event: AGUIEvent) => void;
+  enableCopilotActions?: boolean;
 }
 
 interface ChatMessage {
@@ -30,10 +34,11 @@ interface ChatMessage {
   title?: string;
 }
 
-export const AGUIChat: React.FC<AGUIChatProps> = ({ 
+export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({ 
   endpoint, 
   onMessage, 
-  onEvent 
+  onEvent,
+  enableCopilotActions = true 
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -41,6 +46,159 @@ export const AGUIChat: React.FC<AGUIChatProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+
+  // Make chat context readable to CopilotKit
+  useCopilotReadable({
+    description: enableCopilotActions ? "Current chat messages and conversation context" : "",
+    value: enableCopilotActions ? {
+      messages: messages.map(m => ({ role: m.role, content: m.content })),
+      isConnected,
+      currentUser: localStorage.getItem('userEmail') || 'anonymous'
+    } : {}
+  });
+
+  // CopilotKit action for creating events
+  useCopilotAction({
+    name: "createEvent",
+    description: enableCopilotActions ? "Create a new event in the Rebelz system" : "",
+    parameters: enableCopilotActions ? [
+      {
+        name: "title",
+        type: "string",
+        description: "The title of the event",
+        required: true,
+      },
+      {
+        name: "description",
+        type: "string", 
+        description: "Description of the event",
+        required: true,
+      },
+      {
+        name: "eventType",
+        type: "string",
+        description: "Type of event (sports_class, academic_class, workshop, camp, competition)",
+        required: true,
+      },
+      {
+        name: "startDateTime",
+        type: "string",
+        description: "Start date and time in ISO format",
+        required: true,
+      },
+      {
+        name: "endDateTime", 
+        type: "string",
+        description: "End date and time in ISO format",
+        required: true,
+      }
+    ] : [],
+    handler: enableCopilotActions ? async ({ title, description, eventType, startDateTime, endDateTime }) => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/events', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title,
+            description,
+            event_type: eventType,
+            start_datetime: startDateTime,
+            end_datetime: endDateTime
+          })
+        });
+
+        if (response.ok) {
+          const event = await response.json();
+          return `Successfully created event "${title}" with ID ${event.id}`;
+        } else {
+          throw new Error('Failed to create event');
+        }
+      } catch (error) {
+        return `Error creating event: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      }
+    } : async () => "CopilotKit actions disabled",
+  });
+
+  // CopilotKit action for searching events
+  useCopilotAction({
+    name: "searchEvents",
+    description: enableCopilotActions ? "Search for events in the Rebelz system" : "",
+    parameters: enableCopilotActions ? [
+      {
+        name: "query",
+        type: "string",
+        description: "Search query for events",
+        required: false,
+      },
+      {
+        name: "eventType",
+        type: "string",
+        description: "Filter by event type",
+        required: false,
+      }
+    ] : [],
+    handler: enableCopilotActions ? async ({ query, eventType }) => {
+      try {
+        const token = localStorage.getItem('token');
+        const params = new URLSearchParams();
+        if (query) params.append('search', query);
+        if (eventType) params.append('event_type', eventType);
+
+        const response = await fetch(`/api/events?${params}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const events = await response.json();
+          return `Found ${events.length} events matching your criteria: ${events.map((e: any) => e.title).join(', ')}`;
+        } else {
+          throw new Error('Failed to search events');
+        }
+      } catch (error) {
+        return `Error searching events: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      }
+    } : async () => "CopilotKit actions disabled",
+  });
+
+  // CopilotKit action for registering for events
+  useCopilotAction({
+    name: "registerForEvent",
+    description: enableCopilotActions ? "Register the current user for an event" : "",
+    parameters: enableCopilotActions ? [
+      {
+        name: "eventId",
+        type: "number",
+        description: "The ID of the event to register for",
+        required: true,
+      }
+    ] : [],
+    handler: enableCopilotActions ? async ({ eventId }) => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/events/${eventId}/register`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          return `Successfully registered for event with ID ${eventId}`;
+        } else {
+          const error = await response.text();
+          throw new Error(error || 'Failed to register for event');
+        }
+      } catch (error) {
+        return `Error registering for event: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      }
+    } : async () => "CopilotKit actions disabled",
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,6 +233,14 @@ export const AGUIChat: React.FC<AGUIChatProps> = ({
             
             // Handle different AG-UI event types
             switch (agUIEvent.type) {
+              case 'connection':
+                console.log('AG-UI connection confirmed:', agUIEvent.data);
+                break;
+                
+              case 'heartbeat':
+                // Keep connection alive, no action needed
+                break;
+                
               case 'message' as AGUIEventType:
                 const messageData = agUIEvent.data as AGUIMessage;
                 if (messageData.role === 'assistant') {
@@ -112,10 +278,17 @@ export const AGUIChat: React.FC<AGUIChatProps> = ({
           }
         };
 
-        eventSource.onerror = () => {
+        eventSource.onerror = (error) => {
           setIsConnected(false);
           setIsTyping(false);
-          console.error('AG-UI connection error');
+          console.error('AG-UI connection error:', error);
+          
+          // Attempt to reconnect after a delay
+          setTimeout(() => {
+            if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
+              connectToAGUI();
+            }
+          }, 5000);
         };
 
       } catch (error) {
@@ -217,17 +390,23 @@ export const AGUIChat: React.FC<AGUIChatProps> = ({
     sendMessage(inputMessage);
   };
 
-
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Rebelz AI Assistant</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          Rebelz AI Assistant {enableCopilotActions && '+ CopilotKit'}
+        </h3>
         <div className="flex items-center space-x-2">
           <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
           <span className="text-sm text-gray-500">
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
+          {enableCopilotActions && (
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              CopilotKit Enabled
+            </span>
+          )}
         </div>
       </div>
 
@@ -235,8 +414,17 @@ export const AGUIChat: React.FC<AGUIChatProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
           <div className="text-center text-gray-500 py-8">
-            <p>Hello! I'm your Rebelz AI assistant.</p>
-            <p className="text-sm mt-2">Ask me about events, registrations, or anything else!</p>
+            <p>Hello! I'm your enhanced Rebelz AI assistant.</p>
+            <p className="text-sm mt-2">
+              Ask me about events, registrations, or try commands like:
+            </p>
+            {enableCopilotActions && (
+              <div className="text-xs mt-3 space-y-1 text-gray-400">
+                <p>• "Create a basketball workshop for next Friday"</p>
+                <p>• "Find all upcoming sports classes"</p>
+                <p>• "Register me for the coding bootcamp"</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -298,14 +486,29 @@ export const AGUIChat: React.FC<AGUIChatProps> = ({
       {/* Input */}
       <div className="border-t border-gray-200 p-4">
         <form onSubmit={handleSubmit} className="flex space-x-2">
-          <input
-            type="text"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            disabled={!isConnected || isTyping}
-          />
+          {enableCopilotActions ? (
+            <CopilotTextarea
+              className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+              value={inputMessage}
+              onValueChange={(value: string) => setInputMessage(value)}
+              placeholder="Type your message or ask me to create events, search, register..."
+              disabled={!isConnected || isTyping}
+              autosuggestionsConfig={{
+                textareaPurpose: "Chat with AI assistant about event management, registrations, and organizational tasks",
+                chatApiConfigs: {},
+                disabled: true
+              }}
+            />
+          ) : (
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              disabled={!isConnected || isTyping}
+            />
+          )}
           <button
             type="submit"
             disabled={!inputMessage.trim() || !isConnected || isTyping}
@@ -319,4 +522,4 @@ export const AGUIChat: React.FC<AGUIChatProps> = ({
   );
 };
 
-export default AGUIChat;
+export default EnhancedAGUIChat;

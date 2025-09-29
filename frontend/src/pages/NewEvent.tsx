@@ -149,7 +149,7 @@ const NewEvent: React.FC = () => {
     mutationFn: eventsApi.createEvent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
-      navigate('/events');
+      navigate('/admin/events');
     },
     onError: (error: any) => {
       console.error('Error creating event:', error);
@@ -396,7 +396,7 @@ const NewEvent: React.FC = () => {
       <div className="px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
         <div className="mb-6">
           <button
-            onClick={() => navigate('/events')}
+            onClick={() => navigate('/admin/events')}
             className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -586,7 +586,7 @@ const NewEvent: React.FC = () => {
           <div className="flex justify-end space-x-3">
             <button
               type="button"
-              onClick={() => navigate('/events')}
+              onClick={() => navigate('/admin/events')}
               className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
             >
               Cancel
