@@ -143,6 +143,8 @@ The `.do/app.yaml` file tells Digital Ocean to use our unified container instead
 
 **Solution**: This was fixed in the Dockerfile - make sure you have the latest version that uses `npm ci` (not `npm ci --only=production`) to install dev dependencies needed for the build.
 
+**Performance**: The Dockerfile now uses `uv` instead of `pip` for Python dependencies, making builds **10x faster**! 🚀
+
 #### Option B: Droplet Deployment (More Control)
 
 1. **Create Droplet:**

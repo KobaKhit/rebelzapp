@@ -1,10 +1,17 @@
 version: '3.8'
 
+# Production Docker Compose with uv for fast Python dependency installation
+# Uses unified container approach: Frontend + Backend + Nginx in one container
+
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      # Enable BuildKit for faster builds and caching
+      cache_from:
+        - ghcr.io/astral-sh/uv:python3.11-slim
+        - node:18-alpine
     ports:
       - "80:80"
     environment:

@@ -50,9 +50,9 @@ echo "🏗️  Building and starting containers..."
 echo "🛑 Stopping existing containers..."
 docker-compose down 2>/dev/null || true
 
-# Build and start
-echo "🔨 Building unified container..."
-docker-compose build --no-cache
+# Build and start with BuildKit for faster builds
+echo "🔨 Building unified container with uv (faster Python installs)..."
+DOCKER_BUILDKIT=1 docker-compose build --no-cache
 
 echo "🚀 Starting services..."
 docker-compose up -d

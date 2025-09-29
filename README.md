@@ -31,7 +31,7 @@ A comprehensive full-stack platform for managing educational organizations with 
 - **Frontend**: React, TypeScript, Tailwind CSS, React Query  
 - **AI**: OpenAI API integration with fallback stub responses
 - **Security**: Rate limiting, security headers, request monitoring
-- **DevOps**: Unified Docker container, PostgreSQL, Redis
+- **DevOps**: Unified Docker container, PostgreSQL, Redis, uv for fast Python installs
 - **Deployment**: Single container with Nginx reverse proxy
 
 ## ✨ **Unified Deployment Benefits**
@@ -42,6 +42,7 @@ A comprehensive full-stack platform for managing educational organizations with 
 - 🔧 **Easier Management**: One container to manage instead of three
 - 🌐 **No CORS Issues**: Frontend and API served from same domain
 - 🔒 **Enterprise Security**: Rate limiting, headers, monitoring included
+- ⚡ **Fast Builds**: uv for lightning-fast Python dependency installation
 
 ## 🚀 Quick Start
 

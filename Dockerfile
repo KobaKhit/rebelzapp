@@ -22,25 +22,26 @@ RUN npm run build
 RUN npm prune --production
 
 # Stage 2: Main Application
-FROM python:3.11-slim
+FROM ghcr.io/astral-sh/uv:python3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
 WORKDIR /app
 
 # Install system dependencies including nginx
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     curl \
     nginx \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Python dependencies using uv (much faster than pip)
 COPY requirements.txt ./
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system --no-cache -r requirements.txt
 
 # Copy backend application code
 COPY app/ ./app/
