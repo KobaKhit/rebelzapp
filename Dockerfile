@@ -54,54 +54,67 @@ COPY start.sh ./
 COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
 # Create nginx configuration for serving frontend + API
-RUN echo 'server { \
-    listen 80; \
-    server_name _; \
-    \
-    # Serve frontend static files \
-    location / { \
-        root /app/frontend/dist; \
-        try_files $uri $uri/ /index.html; \
-    } \
-    \
-    # Proxy API requests to FastAPI backend \
-    location /api/ { \
-        proxy_pass http://127.0.0.1:8000/; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-    } \
-    \
-    # Proxy WebSocket connections \
-    location /ws/ { \
-        proxy_pass http://127.0.0.1:8000/ws/; \
-        proxy_http_version 1.1; \
-        proxy_set_header Upgrade $http_upgrade; \
-        proxy_set_header Connection "upgrade"; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-    } \
-    \
-    # Health check endpoint \
-    location /health { \
-        proxy_pass http://127.0.0.1:8000/health; \
-    } \
-}' > /etc/nginx/sites-available/default
+RUN printf 'pid /tmp/nginx.pid;\n\
+error_log /tmp/nginx_error.log;\n\
+\n\
+events {\n\
+    worker_connections 1024;\n\
+}\n\
+\n\
+http {\n\
+    include /etc/nginx/mime.types;\n\
+    default_type application/octet-stream;\n\
+    \n\
+    access_log /tmp/nginx_access.log;\n\
+    \n\
+    sendfile on;\n\
+    keepalive_timeout 65;\n\
+    \n\
+    server {\n\
+        listen 80;\n\
+        server_name _;\n\
+        \n\
+        # Serve frontend static files\n\
+        location / {\n\
+            root /app/frontend/dist;\n\
+            try_files $uri $uri/ /index.html;\n\
+        }\n\
+        \n\
+        # Proxy API requests to FastAPI backend\n\
+        location /api/ {\n\
+            proxy_pass http://127.0.0.1:8000/;\n\
+            proxy_set_header Host $host;\n\
+            proxy_set_header X-Real-IP $remote_addr;\n\
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+            proxy_set_header X-Forwarded-Proto $scheme;\n\
+        }\n\
+        \n\
+        # Proxy WebSocket connections\n\
+        location /ws/ {\n\
+            proxy_pass http://127.0.0.1:8000/ws/;\n\
+            proxy_http_version 1.1;\n\
+            proxy_set_header Upgrade $http_upgrade;\n\
+            proxy_set_header Connection "upgrade";\n\
+            proxy_set_header Host $host;\n\
+            proxy_set_header X-Real-IP $remote_addr;\n\
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+            proxy_set_header X-Forwarded-Proto $scheme;\n\
+        }\n\
+        \n\
+        # Health check endpoint\n\
+        location /health {\n\
+            proxy_pass http://127.0.0.1:8000/health;\n\
+        }\n\
+    }\n\
+}\n\
+' > /etc/nginx/nginx.conf
 
 # Create uploads directory
 RUN mkdir -p /app/uploads && chmod 755 /app/uploads
 
 # Create non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app && \
-    chown -R appuser:appuser /var/log/nginx && \
-    chown -R appuser:appuser /var/lib/nginx && \
-    mkdir -p /var/run && \
-    touch /var/run/nginx.pid && \
-    chown appuser:appuser /var/run/nginx.pid
+    chown -R appuser:appuser /app
 
 # Make startup script executable
 RUN chmod +x /app/start.sh

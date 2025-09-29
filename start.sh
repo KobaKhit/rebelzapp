@@ -3,9 +3,9 @@ set -e
 
 echo "Starting Rebelz App..."
 
-# Start nginx in background
+# Start nginx in background with custom config
 echo "Starting nginx..."
-nginx -g "daemon off;" &
+nginx -c /etc/nginx/nginx.conf -g "daemon off;" &
 
 # Start FastAPI backend
 echo "Starting FastAPI backend..."
