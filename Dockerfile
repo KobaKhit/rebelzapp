@@ -48,6 +48,7 @@ COPY app/ ./app/
 COPY alembic/ ./alembic/
 COPY alembic.ini ./
 COPY create_admin.py ./
+COPY start.sh ./
 
 # Copy built frontend from stage 1
 COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
@@ -102,19 +103,8 @@ RUN adduser --disabled-password --gecos '' appuser && \
     touch /var/run/nginx.pid && \
     chown appuser:appuser /var/run/nginx.pid
 
-# Create startup script
-RUN echo '#!/bin/bash \
-set -e \
-echo "Starting Rebelz App..." \
-\
-# Start nginx in background \
-echo "Starting nginx..." \
-nginx -g "daemon off;" & \
-\
-# Start FastAPI backend \
-echo "Starting FastAPI backend..." \
-uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2 \
-' > /app/start.sh && chmod +x /app/start.sh
+# Make startup script executable
+RUN chmod +x /app/start.sh
 
 USER appuser
 
