@@ -46,30 +46,38 @@ A comprehensive full-stack platform for managing educational organizations with 
 
 ## 🚀 Quick Start
 
-### **Unified Deployment (Recommended)**
+### **Option 1: Automated Setup (Recommended)**
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd rebelzapp
 
-# Setup environment
-cp env.example .env
-# Edit .env with your secure values
+# Run the interactive setup script
+python scripts/setup_env.py
+# Choose 1 for Development or 2 for Production
 
-# One-command deployment
-chmod +x scripts/deploy.sh
-./scripts/deploy.sh
+# Run database migrations
+alembic upgrade head
 
-# Access your app at http://localhost
+# Create admin user
+python create_admin.py
+
+# Start the application
+uvicorn app.main:app --reload  # Development
 ```
 
-### Option 2: Manual Setup
+### Option 2: Manual Development Setup
 ```bash
+# Setup environment
+cp env.development.template .env
+# Edit .env if needed (optional for development)
+
 # Backend setup
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python scripts/seed.py
+alembic upgrade head
+python create_admin.py
 
 # Frontend setup
 cd frontend
@@ -81,7 +89,21 @@ uvicorn app.main:app --reload --port 8000  # Backend
 cd frontend && npm run dev                 # Frontend
 ```
 
-### Option 3: Docker Development
+### Option 3: Production Deployment
+```bash
+# Setup production environment
+python scripts/setup_env.py
+# Choose option 2 (Production)
+# Follow prompts to configure DigitalOcean database
+
+# One-command deployment
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+
+# Access your app at http://localhost
+```
+
+### Option 4: Docker Development
 ```bash
 docker-compose -f docker-compose.dev.yml up
 ```
@@ -125,9 +147,22 @@ eduorg/
 
 ## 🔧 Configuration
 
+### Quick Setup with Script
+The easiest way to configure your environment:
+```bash
+python scripts/setup_env.py
+```
+
+This interactive script will:
+- Guide you through development or production setup
+- Generate secure keys automatically
+- Configure the appropriate database
+- Set up all required environment variables
+
 ### Environment Variables
 ```bash
 # Required
+ENV=development                  # or 'production'
 SECRET_KEY=your_secret_key_here
 DATABASE_URL=sqlite:///./app.db  # or postgresql://...
 
@@ -138,9 +173,20 @@ ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 
 ### Database Options
-- **Development**: SQLite (default)
-- **Production**: PostgreSQL recommended
+- **Development**: 
+  - SQLite (default, no setup required)
+  - Local PostgreSQL (optional, with Docker)
+- **Production**: 
+  - DigitalOcean PostgreSQL (pre-configured)
+  - Any PostgreSQL server with SSL support
 - **Docker**: Includes PostgreSQL service
+
+### Environment Templates
+- `env.example` - General template with all options
+- `env.development.template` - Pre-configured for local development
+- `env.production.template` - Pre-configured for DigitalOcean
+
+See [DIGITALOCEAN_SETUP.md](DIGITALOCEAN_SETUP.md) for detailed database configuration guide.
 
 ## 🎯 API Endpoints
 
