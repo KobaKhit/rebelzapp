@@ -60,21 +60,34 @@ try:
             
             db.commit()
             
-            # Create admin user
+            # Create admin user - prompt for credentials
             print("👤 Creating admin user...")
-            admin_email = "admin@example.com"
-            admin_password = "admin12345"
+            print("\nPlease enter admin credentials:")
+            admin_email = input("Email: ").strip()
+            if not admin_email:
+                admin_email = "admin@example.com"
+                print(f"  Using default: {admin_email}")
+            
+            admin_password = input("Password: ").strip()
+            if not admin_password:
+                print("  ❌ Password cannot be empty!")
+                return
+            
+            full_name = input("Full Name (default: Administrator): ").strip()
+            if not full_name:
+                full_name = "Administrator"
             
             admin = db.execute(select(User).where(User.email == admin_email)).scalar_one_or_none()
             if admin:
                 print("  ℹ️ Admin user already exists, updating password...")
                 admin.password_hash = hash_password(admin_password)
+                admin.full_name = full_name
                 if admin_role not in admin.roles:
                     admin.roles.append(admin_role)
             else:
                 admin = User(
                     email=admin_email,
-                    full_name="Administrator",
+                    full_name=full_name,
                     password_hash=hash_password(admin_password),
                     is_active=True
                 )
@@ -94,9 +107,10 @@ try:
             
             print("\n🎉 Setup complete!")
             print(f"📧 Email: {admin_email}")
-            print(f"🔑 Password: {admin_password}")
+            print(f"👤 Name: {full_name}")
             print(f"🎭 Roles: {[r.name for r in admin.roles]}")
-            print("\n🌐 You can now login at: http://127.0.0.1:8000")
+            print("\n⚠️  Keep your credentials secure!")
+            print("🌐 You can now login at your application URL")
             
         except Exception as e:
             print(f"❌ Error: {e}")

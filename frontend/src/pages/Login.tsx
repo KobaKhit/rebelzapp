@@ -3,8 +3,8 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('admin12345');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -102,21 +102,6 @@ const Login: React.FC = () => {
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Demo credentials</span>
-              </div>
-            </div>
-            <div className="mt-3 text-sm text-gray-600 text-center">
-              Use <code className="bg-gray-100 px-1 rounded">admin@example.com</code> / <code className="bg-gray-100 px-1 rounded">admin12345</code>
-              <br />
-              (Run seed script if needed)
-            </div>
-          </div>
         </div>
       </div>
     </div>
