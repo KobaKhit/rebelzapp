@@ -76,7 +76,7 @@ const SignupPage: React.FC = () => {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
               <img 
-                src="/rebelz-logo.png" 
+                src="/rebelz-logo.svg" 
                 alt="Rebelz" 
                 className="h-10 w-auto"
               />

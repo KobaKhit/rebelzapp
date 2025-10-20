@@ -34,7 +34,7 @@ const Login: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center mb-6">
           <img 
-            src="/rebelz-logo.png" 
+            src="/rebelz-logo.svg" 
             alt="Rebelz" 
             className="h-16 w-auto"
           />
