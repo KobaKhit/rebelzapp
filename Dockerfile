@@ -76,7 +76,7 @@ http {\n\
     keepalive_timeout 65;\n\
     \n\
     server {\n\
-        listen 8080;\n\
+        listen 80;\n\
         server_name _;\n\
         \n\
         # Serve frontend static files\n\
@@ -118,21 +118,22 @@ http {\n\
 RUN mkdir -p /app/uploads /tmp/client_temp /tmp/proxy_temp_path /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
     chmod -R 755 /app/uploads /tmp/client_temp /tmp/proxy_temp_path /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
 
-# Create non-root user for security
+# Create non-root user for backend only
 RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app /tmp/client_temp /tmp/proxy_temp_path /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
+    chown -R appuser:appuser /app
 
 # Make startup script executable
 RUN chmod +x /app/start.sh
 
-USER appuser
+# Run as root to allow nginx to bind to port 80
+# Note: nginx will be run by root, but uvicorn will run as appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:80/health || exit 1
 
-# Expose port 8080 (nginx serves both frontend and proxies API)
-EXPOSE 8080
+# Expose port 80 (nginx serves both frontend and proxies API)
+EXPOSE 80
 
 # Start both services
 CMD ["/app/start.sh"]
