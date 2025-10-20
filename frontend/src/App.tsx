@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './lib/auth';
+import { ViewModeProvider, useViewMode } from './lib/viewMode';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
@@ -29,6 +30,7 @@ const queryClient = new QueryClient({
 
 const AppRoutes: React.FC = () => {
   const { user, isLoading, hasPermission } = useAuth();
+  const { viewMode, canSwitchView } = useViewMode();
 
   if (isLoading) {
     return (
@@ -39,7 +41,10 @@ const AppRoutes: React.FC = () => {
   }
 
   // Determine if user has admin permissions
-  const isAdmin = user && (hasPermission('manage_users') || hasPermission('manage_events') || hasPermission('manage_roles'));
+  const hasAdminPermissions = user && (hasPermission('manage_users') || hasPermission('manage_events') || hasPermission('manage_roles'));
+  
+  // Use view mode if user can switch, otherwise use their actual permissions
+  const isAdmin = canSwitchView ? viewMode === 'admin' : hasAdminPermissions;
 
   return (
     <Routes>
@@ -196,11 +201,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <AppRoutes />
-          </div>
-        </Router>
+        <ViewModeProvider>
+          <Router>
+            <div className="min-h-screen bg-gray-50">
+              <AppRoutes />
+            </div>
+          </Router>
+        </ViewModeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

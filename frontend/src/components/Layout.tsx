@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { useViewMode } from '../lib/viewMode';
 import rebelzLogo from '../assets/rebelz-logo-old.png';
 import {
   HomeIcon,
@@ -12,6 +13,7 @@ import {
   MagnifyingGlassIcon,
   UserIcon,
   SparklesIcon,
+  ArrowsRightLeftIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
@@ -21,6 +23,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout, hasPermission } = useAuth();
+  const { viewMode, setViewMode, canSwitchView } = useViewMode();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,7 +33,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   // Determine if user has admin permissions
-  const isAdmin = user && (hasPermission('manage_users') || hasPermission('manage_events') || hasPermission('manage_roles'));
+  const hasAdminPermissions = user && (hasPermission('manage_users') || hasPermission('manage_events') || hasPermission('manage_roles'));
+  
+  // Use view mode if user can switch, otherwise use their actual permissions
+  const isAdmin = canSwitchView ? viewMode === 'admin' : hasAdminPermissions;
+
+  const handleViewModeToggle = () => {
+    const newMode = viewMode === 'admin' ? 'consumer' : 'admin';
+    setViewMode(newMode);
+    // Redirect to appropriate home page
+    navigate(newMode === 'admin' ? '/dashboard' : '/dashboard');
+  };
 
   // Consumer navigation
   const consumerNavigation = [
@@ -119,8 +132,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </div>
             <div className="hidden md:block">
-              <div className="ml-4 flex items-center md:ml-6">
-                <div className={`text-sm mr-4 ${isAdmin ? 'text-gray-300' : 'text-blue-100'}`}>
+              <div className="ml-4 flex items-center md:ml-6 gap-2">
+                {canSwitchView && (
+                  <button
+                    onClick={handleViewModeToggle}
+                    className={`rounded-md px-3 py-2 text-sm font-medium flex items-center gap-2 transition-all ${
+                      isAdmin 
+                        ? 'bg-gray-700 text-white hover:bg-gray-600' 
+                        : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                    }`}
+                    title={`Switch to ${viewMode === 'admin' ? 'Consumer' : 'Admin'} View`}
+                  >
+                    <ArrowsRightLeftIcon className="h-4 w-4" />
+                    {viewMode === 'admin' ? 'Consumer View' : 'Admin View'}
+                  </button>
+                )}
+                <div className={`text-sm mr-2 ${isAdmin ? 'text-gray-300' : 'text-blue-100'}`}>
                   {user?.full_name || user?.email}
                 </div>
                 <button
