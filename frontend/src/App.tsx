@@ -43,19 +43,23 @@ const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public Routes - Signup is the landing page */}
+      <Route 
+        path="/" 
+        element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} 
+      />
       <Route 
         path="/login" 
-        element={user ? <Navigate to="/" replace /> : <Login />} 
+        element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
       />
       <Route 
         path="/signup" 
-        element={user ? <Navigate to="/" replace /> : <SignupPage />} 
+        element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} 
       />
 
-      {/* Consumer Routes */}
+      {/* Dashboard Routes */}
       <Route
-        path="/"
+        path="/dashboard"
         element={
           <ProtectedRoute>
             {isAdmin ? <Dashboard /> : <ConsumerDashboard />}
@@ -100,7 +104,7 @@ const AppRoutes: React.FC = () => {
         path="/admin"
         element={
           <ProtectedRoute>
-            {isAdmin ? <Dashboard /> : <Navigate to="/" replace />}
+            {isAdmin ? <Dashboard /> : <Navigate to="/dashboard" replace />}
           </ProtectedRoute>
         }
       />
@@ -132,7 +136,7 @@ const AppRoutes: React.FC = () => {
         path="/admin/users"
         element={
           <ProtectedRoute>
-            {(hasPermission('manage_users') || hasPermission('manage_roles')) ? <AdminPage /> : <Navigate to="/" replace />}
+            {(hasPermission('manage_users') || hasPermission('manage_roles')) ? <AdminPage /> : <Navigate to="/dashboard" replace />}
           </ProtectedRoute>
         }
       />
@@ -170,7 +174,7 @@ const AppRoutes: React.FC = () => {
         path="/admin/chat"
         element={
           <ProtectedRoute>
-            {(hasPermission('manage_users') || hasPermission('manage_events')) ? <AdminChat /> : <Navigate to="/" replace />}
+            {(hasPermission('manage_users') || hasPermission('manage_events')) ? <AdminChat /> : <Navigate to="/dashboard" replace />}
           </ProtectedRoute>
         }
       />
@@ -183,7 +187,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
     </Routes>
   );
 };
