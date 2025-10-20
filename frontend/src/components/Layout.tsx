@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { useViewMode } from '../lib/viewMode';
@@ -14,6 +14,8 @@ import {
   UserIcon,
   SparklesIcon,
   ArrowsRightLeftIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
@@ -26,10 +28,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { viewMode, setViewMode, canSwitchView } = useViewMode();
   const location = useLocation();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setMobileMenuOpen(false);
   };
 
   // Determine if user has admin permissions
@@ -43,6 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setViewMode(newMode);
     // Redirect to appropriate home page
     navigate(newMode === 'admin' ? '/dashboard' : '/dashboard');
+    setMobileMenuOpen(false);
   };
 
   // Consumer navigation
@@ -163,8 +168,101 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </button>
               </div>
             </div>
+            <div className="flex md:hidden">
+              <button
+                type="button"
+                className={`inline-flex items-center justify-center rounded-md p-2 ${
+                  isAdmin 
+                    ? 'text-gray-400 hover:bg-gray-700 hover:text-white' 
+                    : 'text-white hover:bg-white hover:bg-opacity-10'
+                }`}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                <span className="sr-only">Open main menu</span>
+                {mobileMenuOpen ? (
+                  <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
+              {filteredNavigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={clsx(
+                    item.current
+                      ? (isAdmin ? 'bg-gray-900 text-white' : 'bg-white bg-opacity-20 text-white')
+                      : (isAdmin ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-blue-100 hover:bg-white hover:bg-opacity-10 hover:text-white'),
+                    'block rounded-md px-3 py-2 text-base font-medium'
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <item.icon className="h-5 w-5" />
+                    {item.name}
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="border-t border-gray-700 pb-3 pt-4">
+              <div className="flex items-center px-5">
+                <div className="flex-shrink-0">
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                    isAdmin ? 'bg-gray-700' : 'bg-white bg-opacity-20'
+                  }`}>
+                    <UserIcon className={`h-6 w-6 ${isAdmin ? 'text-gray-300' : 'text-white'}`} />
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <div className={`text-base font-medium ${isAdmin ? 'text-white' : 'text-white'}`}>
+                    {user?.full_name || 'User'}
+                  </div>
+                  <div className={`text-sm font-medium ${isAdmin ? 'text-gray-400' : 'text-blue-100'}`}>
+                    {user?.email}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 space-y-1 px-2">
+                {canSwitchView && (
+                  <button
+                    onClick={handleViewModeToggle}
+                    className={`block w-full text-left rounded-md px-3 py-2 text-base font-medium ${
+                      isAdmin 
+                        ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
+                        : 'text-blue-100 hover:bg-white hover:bg-opacity-10 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <ArrowsRightLeftIcon className="h-5 w-5" />
+                      {viewMode === 'admin' ? 'Switch to Consumer View' : 'Switch to Admin View'}
+                    </div>
+                  </button>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className={`block w-full text-left rounded-md px-3 py-2 text-base font-medium ${
+                    isAdmin 
+                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
+                      : 'text-blue-100 hover:bg-white hover:bg-opacity-10 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                    Logout
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       <main className={isAdmin ? "" : "bg-gray-50"}>
