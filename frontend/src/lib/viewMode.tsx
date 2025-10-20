@@ -19,7 +19,7 @@ export const ViewModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const isAdmin = user && (hasPermission('manage_users') || hasPermission('manage_events') || hasPermission('manage_roles'));
   
   // Check if user has student role
-  const hasStudentRole = user?.roles?.some(role => role.name === 'student');
+  const hasStudentRole = user?.roles?.includes('student');
   
   // User can switch views if they have both admin permissions AND student role
   const canSwitchView = Boolean(isAdmin && hasStudentRole);
