@@ -91,29 +91,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-full">
-      <nav className={isAdmin ? "bg-gray-800" : "bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700"}>
+      <nav className="bg-primary">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <Link to="/" className="flex items-center space-x-3">
-                  {!isAdmin ? (
-                    <div className="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                      <SparklesIcon className="w-6 h-6 text-white" />
-                    </div>
-                  ) : (
-                    <img 
-                      src={rebelzLogo} 
-                      alt="Rebelz" 
-                      className="h-24 w-auto"
-                    />
-                  )}
-                  {!isAdmin && (
-                    <div className="text-white">
-                      <div className="text-xl font-bold">Rebelz</div>
-                      <div className="text-xs text-blue-100">Basketball & Education</div>
-                    </div>
-                  )}
+                  <img 
+                    src={rebelzLogo} 
+                    alt="Rebelz" 
+                    className="h-12 w-auto"
+                  />
                 </Link>
               </div>
               <div className="hidden md:block">
@@ -124,8 +112,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       to={item.href}
                       className={clsx(
                         item.current
-                          ? (isAdmin ? 'bg-gray-900 text-white' : 'bg-white bg-opacity-20 text-white')
-                          : (isAdmin ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-blue-100 hover:bg-white hover:bg-opacity-10 hover:text-white'),
+                          ? 'bg-secondary text-white'
+                          : 'text-gray-300 hover:bg-secondary hover:bg-opacity-80 hover:text-white',
                         'rounded-md px-3 py-2 text-sm font-medium flex items-center gap-2 transition-all'
                       )}
                     >
@@ -141,27 +129,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {canSwitchView && (
                   <button
                     onClick={handleViewModeToggle}
-                    className={`rounded-md px-3 py-2 text-sm font-medium flex items-center gap-2 transition-all ${
-                      isAdmin 
-                        ? 'bg-gray-700 text-white hover:bg-gray-600' 
-                        : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
-                    }`}
+                    className="rounded-md px-3 py-2 text-sm font-medium flex items-center gap-2 transition-all bg-primary-700 text-white hover:bg-primary-600"
                     title={`Switch to ${viewMode === 'admin' ? 'Consumer' : 'Admin'} View`}
                   >
                     <ArrowsRightLeftIcon className="h-4 w-4" />
                     {viewMode === 'admin' ? 'Consumer View' : 'Admin View'}
                   </button>
                 )}
-                <div className={`text-sm mr-2 ${isAdmin ? 'text-gray-300' : 'text-blue-100'}`}>
+                <div className="text-sm mr-2 text-gray-300">
                   {user?.full_name || user?.email}
                 </div>
                 <button
                   onClick={handleLogout}
-                  className={`rounded-md px-3 py-2 text-sm font-medium flex items-center gap-2 transition-all ${
-                    isAdmin 
-                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                      : 'text-blue-100 hover:bg-white hover:bg-opacity-10 hover:text-white'
-                  }`}
+                  className="rounded-md px-3 py-2 text-sm font-medium flex items-center gap-2 transition-all text-gray-300 hover:bg-secondary hover:bg-opacity-80 hover:text-white"
                 >
                   <ArrowRightOnRectangleIcon className="h-4 w-4" />
                   Logout
@@ -171,11 +151,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex md:hidden">
               <button
                 type="button"
-                className={`inline-flex items-center justify-center rounded-md p-2 ${
-                  isAdmin 
-                    ? 'text-gray-400 hover:bg-gray-700 hover:text-white' 
-                    : 'text-white hover:bg-white hover:bg-opacity-10'
-                }`}
+                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-secondary hover:bg-opacity-80 hover:text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 <span className="sr-only">Open main menu</span>
@@ -200,8 +176,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onClick={() => setMobileMenuOpen(false)}
                   className={clsx(
                     item.current
-                      ? (isAdmin ? 'bg-gray-900 text-white' : 'bg-white bg-opacity-20 text-white')
-                      : (isAdmin ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-blue-100 hover:bg-white hover:bg-opacity-10 hover:text-white'),
+                      ? 'bg-secondary text-white'
+                      : 'text-gray-300 hover:bg-secondary hover:bg-opacity-80 hover:text-white',
                     'block rounded-md px-3 py-2 text-base font-medium'
                   )}
                 >
@@ -215,17 +191,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="border-t border-gray-700 pb-3 pt-4">
               <div className="flex items-center px-5">
                 <div className="flex-shrink-0">
-                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                    isAdmin ? 'bg-gray-700' : 'bg-white bg-opacity-20'
-                  }`}>
-                    <UserIcon className={`h-6 w-6 ${isAdmin ? 'text-gray-300' : 'text-white'}`} />
+                  <div className="h-10 w-10 rounded-full flex items-center justify-center bg-primary-700">
+                    <UserIcon className="h-6 w-6 text-gray-300" />
                   </div>
                 </div>
                 <div className="ml-3">
-                  <div className={`text-base font-medium ${isAdmin ? 'text-white' : 'text-white'}`}>
+                  <div className="text-base font-medium text-white">
                     {user?.full_name || 'User'}
                   </div>
-                  <div className={`text-sm font-medium ${isAdmin ? 'text-gray-400' : 'text-blue-100'}`}>
+                  <div className="text-sm font-medium text-gray-400">
                     {user?.email}
                   </div>
                 </div>
@@ -234,11 +208,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {canSwitchView && (
                   <button
                     onClick={handleViewModeToggle}
-                    className={`block w-full text-left rounded-md px-3 py-2 text-base font-medium ${
-                      isAdmin 
-                        ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                        : 'text-blue-100 hover:bg-white hover:bg-opacity-10 hover:text-white'
-                    }`}
+                    className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-secondary hover:bg-opacity-80 hover:text-white"
                   >
                     <div className="flex items-center gap-2">
                       <ArrowsRightLeftIcon className="h-5 w-5" />
@@ -248,11 +218,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
                 <button
                   onClick={handleLogout}
-                  className={`block w-full text-left rounded-md px-3 py-2 text-base font-medium ${
-                    isAdmin 
-                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
-                      : 'text-blue-100 hover:bg-white hover:bg-opacity-10 hover:text-white'
-                  }`}
+                  className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-secondary hover:bg-opacity-80 hover:text-white"
                 >
                   <div className="flex items-center gap-2">
                     <ArrowRightOnRectangleIcon className="h-5 w-5" />
@@ -265,8 +231,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         )}
       </nav>
 
-      <main className={isAdmin ? "" : "bg-gray-50"}>
-        <div className={isAdmin ? "mx-auto max-w-7xl py-6 sm:px-6 lg:px-8" : ""}>
+      <main className="bg-gray-50">
+        <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           {children}
         </div>
       </main>

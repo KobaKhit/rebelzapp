@@ -140,25 +140,25 @@ const ConsumerDashboard: React.FC = () => {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white bg-opacity-10 rounded-full -mr-20 -mt-20"></div>
-          <div className="absolute bottom-0 right-10 w-24 h-24 bg-white bg-opacity-10 rounded-full"></div>
+        <div className="bg-primary rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-secondary bg-opacity-20 rounded-full -mr-20 -mt-20"></div>
+          <div className="absolute bottom-0 right-10 w-24 h-24 bg-secondary bg-opacity-20 rounded-full"></div>
           
           <div className="relative z-10">
             <div className="flex items-center space-x-3 mb-4">
-              <SparklesIcon className="w-8 h-8" />
+              <SparklesIcon className="w-8 h-8 text-secondary" />
               <h1 className="text-3xl font-bold">
                 Welcome back, {user?.full_name?.split(' ')[0] || 'Player'}! 🏀
               </h1>
             </div>
-            <p className="text-blue-100 text-lg mb-6">
+            <p className="text-gray-300 text-lg mb-6">
               Ready to level up your game? Check out what's happening in the Rebelz community.
             </p>
             
             <div className="flex flex-wrap gap-4">
               <Link
                 to="/discover"
-                className="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-lg font-medium transition-all flex items-center space-x-2"
+                className="bg-secondary hover:bg-secondary-700 px-6 py-3 rounded-lg font-medium transition-all flex items-center space-x-2"
               >
                 <span>Discover Events</span>
                 <ArrowRightIcon className="w-4 h-4" />
@@ -182,12 +182,12 @@ const ConsumerDashboard: React.FC = () => {
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900 flex items-center space-x-2">
-                    <ClockIcon className="w-6 h-6 text-blue-600" />
+                    <ClockIcon className="w-6 h-6 text-secondary" />
                     <span>My Upcoming Events</span>
                   </h2>
                   <Link
                     to="/my-events"
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    className="text-secondary hover:text-secondary-700 font-medium text-sm"
                   >
                     View all
                   </Link>
@@ -242,7 +242,7 @@ const ConsumerDashboard: React.FC = () => {
                 </p>
                 <Link
                   to="/discover"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  className="bg-secondary text-white px-6 py-3 rounded-lg hover:bg-secondary-700 transition-colors font-medium"
                 >
                   Discover Events
                 </Link>
@@ -253,7 +253,7 @@ const ConsumerDashboard: React.FC = () => {
             {/* Activity Feed */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
-                <ChatBubbleLeftEllipsisIcon className="w-6 h-6 text-purple-600" />
+                <ChatBubbleLeftEllipsisIcon className="w-6 h-6 text-secondary" />
                 <span>Community Activity</span>
               </h2>
               
@@ -269,7 +269,7 @@ const ConsumerDashboard: React.FC = () => {
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="font-semibold text-gray-900">{activity.user}</span>
                         <span className="text-gray-600">{activity.action}</span>
-                        <span className="font-medium text-blue-600">{activity.target}</span>
+                        <span className="font-medium text-secondary">{activity.target}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">{activity.time}</span>
@@ -278,7 +278,7 @@ const ConsumerDashboard: React.FC = () => {
                             <HeartIcon className="w-4 h-4" />
                             <span className="text-sm">12</span>
                           </button>
-                          <button className="flex items-center space-x-1 text-gray-500 hover:text-blue-500 transition-colors">
+                          <button className="flex items-center space-x-1 text-gray-500 hover:text-secondary transition-colors">
                             <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
                             <span className="text-sm">3</span>
                           </button>
@@ -293,7 +293,7 @@ const ConsumerDashboard: React.FC = () => {
               </div>
               
               <div className="mt-6 pt-6 border-t border-gray-100">
-                <button className="w-full py-3 text-blue-600 hover:text-blue-700 font-medium">
+                <button className="w-full py-3 text-secondary hover:text-secondary-700 font-medium">
                   Load more activity
                 </button>
               </div>
@@ -308,7 +308,7 @@ const ConsumerDashboard: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Events Registered</span>
-                  <span className="font-semibold text-blue-600">
+                  <span className="font-semibold text-secondary">
                     {registrationsError ? '—' : myRegistrations.length}
                   </span>
                 </div>
@@ -323,7 +323,7 @@ const ConsumerDashboard: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Community Rank</span>
-                  <span className="font-semibold text-purple-600">#42</span>
+                  <span className="font-semibold text-secondary">#42</span>
                 </div>
               </div>
             </div>
@@ -334,7 +334,7 @@ const ConsumerDashboard: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900">Featured Events</h3>
                 <Link
                   to="/discover"
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  className="text-secondary hover:text-secondary-700 text-sm font-medium"
                 >
                   See all
                 </Link>
@@ -376,12 +376,12 @@ const ConsumerDashboard: React.FC = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl p-6 text-white">
+            <div className="bg-primary rounded-xl p-6 text-white">
               <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <Link
                   to="/discover"
-                  className="block w-full bg-white bg-opacity-20 hover:bg-opacity-30 py-3 px-4 rounded-lg font-medium text-center transition-all"
+                  className="block w-full bg-secondary hover:bg-secondary-700 py-3 px-4 rounded-lg font-medium text-center transition-all"
                 >
                   Find Events
                 </Link>

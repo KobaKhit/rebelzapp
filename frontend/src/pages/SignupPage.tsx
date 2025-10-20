@@ -8,8 +8,7 @@ import {
   EyeSlashIcon,
   AcademicCapIcon,
   TrophyIcon,
-  UsersIcon,
-  SparklesIcon
+  UsersIcon
 } from '@heroicons/react/24/outline';
 
 const SignupPage: React.FC = () => {
@@ -70,23 +69,21 @@ const SignupPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <SparklesIcon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Rebelz</h1>
-                <p className="text-xs text-gray-500">Basketball & Education</p>
-              </div>
+              <img 
+                src="/rebelz-logo.png" 
+                alt="Rebelz" 
+                className="h-10 w-auto"
+              />
             </div>
             <Link 
               to="/login" 
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-secondary hover:text-secondary-700 font-medium"
             >
               Already have an account? Sign in
             </Link>
@@ -96,45 +93,44 @@ const SignupPage: React.FC = () => {
 
       <div className="flex">
         {/* Left side - Hero content */}
-        <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 relative overflow-hidden">
-          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-primary relative overflow-hidden">
           <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
             <div className="max-w-md">
               <h2 className="text-4xl xl:text-5xl font-bold mb-6">
                 Join the Rebelz Community
               </h2>
-              <p className="text-xl mb-8 text-blue-100">
+              <p className="text-xl mb-8 text-gray-300">
                 Discover basketball programs, educational workshops, and connect with players and coaches in Philadelphia.
               </p>
               
               <div className="space-y-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center">
                     <TrophyIcon className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="font-semibold">Elite Training Programs</h3>
-                    <p className="text-blue-100">Join leagues, clinics, and camps</p>
+                    <p className="text-gray-300">Join leagues, clinics, and camps</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center">
                     <AcademicCapIcon className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="font-semibold">Educational Excellence</h3>
-                    <p className="text-blue-100">STEM programs and workforce readiness</p>
+                    <p className="text-gray-300">STEM programs and workforce readiness</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center">
                     <UsersIcon className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="font-semibold">Community Network</h3>
-                    <p className="text-blue-100">Connect with coaches, players, and families</p>
+                    <p className="text-gray-300">Connect with coaches, players, and families</p>
                   </div>
                 </div>
               </div>
@@ -142,9 +138,9 @@ const SignupPage: React.FC = () => {
           </div>
           
           {/* Decorative elements */}
-          <div className="absolute top-10 right-10 w-32 h-32 bg-white bg-opacity-10 rounded-full"></div>
-          <div className="absolute bottom-10 right-32 w-20 h-20 bg-white bg-opacity-10 rounded-full"></div>
-          <div className="absolute top-1/2 right-5 w-16 h-16 bg-white bg-opacity-10 rounded-full"></div>
+          <div className="absolute top-10 right-10 w-32 h-32 bg-secondary bg-opacity-20 rounded-full"></div>
+          <div className="absolute bottom-10 right-32 w-20 h-20 bg-secondary bg-opacity-20 rounded-full"></div>
+          <div className="absolute top-1/2 right-5 w-16 h-16 bg-secondary bg-opacity-20 rounded-full"></div>
         </div>
 
         {/* Right side - Signup form */}
@@ -176,7 +172,7 @@ const SignupPage: React.FC = () => {
                   type="text"
                   value={formData.full_name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-colors ${
                     errors.full_name ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="Enter your full name"
@@ -196,7 +192,7 @@ const SignupPage: React.FC = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-colors ${
                     errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="Enter your email"
@@ -217,7 +213,7 @@ const SignupPage: React.FC = () => {
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors pr-12 ${
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-colors pr-12 ${
                       errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
                     }`}
                     placeholder="Create a password"
@@ -245,7 +241,7 @@ const SignupPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={signupMutation.isPending}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full bg-secondary text-white py-3 px-4 rounded-lg font-medium hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {signupMutation.isPending ? (
                   <div className="flex items-center justify-center">
@@ -261,11 +257,11 @@ const SignupPage: React.FC = () => {
             <div className="mt-8 text-center">
               <p className="text-xs text-gray-500">
                 By creating an account, you agree to our{' '}
-                <a href="#" className="text-blue-600 hover:text-blue-700">
+                <a href="#" className="text-secondary hover:text-secondary-700">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="#" className="text-blue-600 hover:text-blue-700">
+                <a href="#" className="text-secondary hover:text-secondary-700">
                   Privacy Policy
                 </a>
               </p>
