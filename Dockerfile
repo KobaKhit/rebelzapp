@@ -46,6 +46,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Copy backend application code
 COPY app/ ./app/
 COPY alembic/ ./alembic/
+COPY scripts/ ./scripts/
 COPY alembic.ini ./
 COPY create_admin.py ./
 COPY start.sh ./
