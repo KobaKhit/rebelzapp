@@ -23,11 +23,11 @@ Then add the output (should be 64 characters long)
 
 ### 3. ALLOWED_ORIGINS ⚠️ **CRITICAL**
 ```
+https://rebelz.app,https://www.rebelz.app
+```
+Or use dynamic URL:
+```
 ${_self.PUBLIC_URL}
-```
-Or if you have a custom domain:
-```
-https://your-domain.com,https://www.your-domain.com
 ```
 - **Encrypt:** ❌ No
 - **Why:** CORS security - allows your frontend to call the API
@@ -37,6 +37,10 @@ https://your-domain.com,https://www.your-domain.com
 - **Why:** For AI features
 
 ### 5. VITE_API_BASE_URL (Recommended)
+```
+https://rebelz.app
+```
+Or use dynamic URL:
 ```
 ${_self.PUBLIC_URL}
 ```
@@ -131,12 +135,12 @@ postgresql://username:password@your-host.db.ondigitalocean.com:25060/defaultdb?s
 
 **ALLOWED_ORIGINS:**
 ```
-${_self.PUBLIC_URL}
+https://rebelz.app,https://www.rebelz.app
 ```
 
 **VITE_API_BASE_URL:**
 ```
-${_self.PUBLIC_URL}
+https://rebelz.app
 ```
 
 **SECRET_KEY:**
