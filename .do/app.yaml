@@ -11,7 +11,7 @@ services:
     # github:
     #   repo: your-username/rebelzapp  # Replace with your actual repo
     #   branch: main
-    http_port: 80
+    http_port: 8080
     instance_count: 1
     instance_size_slug: basic-xxs  # $5/month - can upgrade as needed
     
@@ -22,18 +22,6 @@ services:
         value: "false"
       - key: ENABLE_DOCS
         value: "false"
-      - key: DATABASE_URL
-        value: ${db.DATABASE_URL}
-      - key: SECRET_KEY
-        value: ${SECRET_KEY}
-      - key: ALLOWED_ORIGINS
-        value: ${ALLOWED_ORIGINS}
-      - key: POSTGRES_PASSWORD
-        value: ${POSTGRES_PASSWORD}
-      - key: REDIS_PASSWORD
-        value: ${REDIS_PASSWORD}
-      - key: OPENAI_API_KEY
-        value: ${OPENAI_API_KEY}
       - key: MODEL_NAME
         value: gpt-4o-mini
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
@@ -46,20 +34,12 @@ services:
         value: "100"
       - key: RATE_LIMIT_PERIOD
         value: "60"
-      - key: REDIS_URL
-        value: ${redis.REDIS_URL}
-      - key: VITE_API_BASE_URL
-        value: ${_self.PUBLIC_URL}
+      # Add these in DigitalOcean App Platform UI:
+      # - DATABASE_URL (your external PostgreSQL connection string)
+      # - SECRET_KEY (generate with: python -c "import secrets; print(secrets.token_hex(32))")
+      # - ALLOWED_ORIGINS (use ${_self.PUBLIC_URL} or your domain)
+      # - OPENAI_API_KEY (already added)
+      # - VITE_API_BASE_URL (use ${_self.PUBLIC_URL})
 
-databases:
-  - name: db
-    engine: PG
-    version: "15"
-    production: true
-    size: basic
-
-  - name: redis
-    engine: REDIS
-    version: "7"
-    production: true
-    size: basic
+# Note: Using external DigitalOcean PostgreSQL database
+# No managed databases needed in this configuration

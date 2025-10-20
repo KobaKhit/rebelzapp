@@ -66,12 +66,17 @@ http {\n\
     default_type application/octet-stream;\n\
     \n\
     access_log /tmp/nginx_access.log;\n\
+    client_body_temp_path /tmp/client_temp;\n\
+    proxy_temp_path /tmp/proxy_temp_path;\n\
+    fastcgi_temp_path /tmp/fastcgi_temp;\n\
+    uwsgi_temp_path /tmp/uwsgi_temp;\n\
+    scgi_temp_path /tmp/scgi_temp;\n\
     \n\
     sendfile on;\n\
     keepalive_timeout 65;\n\
     \n\
     server {\n\
-        listen 80;\n\
+        listen 8080;\n\
         server_name _;\n\
         \n\
         # Serve frontend static files\n\
@@ -109,12 +114,13 @@ http {\n\
 }\n\
 ' > /etc/nginx/nginx.conf
 
-# Create uploads directory
-RUN mkdir -p /app/uploads && chmod 755 /app/uploads
+# Create uploads directory and temp directories for nginx
+RUN mkdir -p /app/uploads /tmp/client_temp /tmp/proxy_temp_path /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
+    chmod -R 755 /app/uploads /tmp/client_temp /tmp/proxy_temp_path /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
 
 # Create non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app /tmp/client_temp /tmp/proxy_temp_path /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
 
 # Make startup script executable
 RUN chmod +x /app/start.sh
@@ -123,10 +129,10 @@ USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
-# Expose port 80 (nginx serves both frontend and proxies API)
-EXPOSE 80
+# Expose port 8080 (nginx serves both frontend and proxies API)
+EXPOSE 8080
 
 # Start both services
 CMD ["/app/start.sh"]
