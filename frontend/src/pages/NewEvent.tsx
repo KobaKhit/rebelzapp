@@ -146,8 +146,9 @@ const NewEvent: React.FC = () => {
     },
     onError: (error: unknown) => {
       console.error('Error creating event:', error);
-      if (error.response?.data?.detail) {
-        setErrors({ general: error.response.data.detail });
+      const err = error as { response?: { data?: { detail?: string } } };
+      if (err.response?.data?.detail) {
+        setErrors({ general: err.response.data.detail });
       } else {
         setErrors({ general: 'Failed to create event. Please try again.' });
       }
@@ -162,12 +163,12 @@ const NewEvent: React.FC = () => {
     if (name.startsWith('data.')) {
       // Handle data fields
       const fieldName = name.replace('data.', '');
-      let processedValue: string | number | boolean = value;
+      let processedValue: string | number | boolean | undefined = value;
       
       if (type === 'checkbox') {
         processedValue = (e.target as HTMLInputElement).checked;
       } else if (type === 'number') {
-        processedValue = value ? parseFloat(value) : undefined;
+        processedValue = value ? parseFloat(value) : '';
       }
       
       setFormData(prev => ({
@@ -287,7 +288,7 @@ const NewEvent: React.FC = () => {
                     type="text"
                     id={fieldName}
                     name={fieldName}
-                    value={fieldValue}
+                    value={fieldValue || ''}
                     onChange={handleInputChange}
                     placeholder={field.placeholder}
                     className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
@@ -301,7 +302,7 @@ const NewEvent: React.FC = () => {
                     id={fieldName}
                     name={fieldName}
                     rows={3}
-                    value={fieldValue}
+                    value={fieldValue || ''}
                     onChange={handleInputChange}
                     placeholder={field.placeholder}
                     className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${

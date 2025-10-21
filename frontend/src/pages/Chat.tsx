@@ -20,7 +20,7 @@ import {
 import type { User, ChatGroup as ChatGroupType, ChatMessageResponse } from '../types';
 
 interface ChatGroup extends ChatGroupType {
-  created_by_id: number;
+  created_by_id?: number;
   managed_by_id?: number;
   created_by?: User;
   managed_by?: User;
@@ -28,7 +28,7 @@ interface ChatGroup extends ChatGroupType {
 }
 
 interface ChatMessage extends ChatMessageResponse {
-  sender_id: number;
+  sender_id?: number;
   sender?: User;
 }
 

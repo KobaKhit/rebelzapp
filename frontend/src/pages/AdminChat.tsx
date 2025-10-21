@@ -16,11 +16,11 @@ import {
 import type { User, ChatGroup as ChatGroupType, ChatMember } from '../types';
 
 interface ChatGroup extends ChatGroupType {
-  created_by_id: number;
+  created_by_id?: number;
   managed_by_id?: number;
   created_by?: User;
   managed_by?: User;
-  members: ChatMember[];
+  members?: ChatMember[];
   member_count?: number;
 }
 
@@ -362,11 +362,11 @@ const AdminChat: React.FC = () => {
                   <h4 className="text-sm font-medium text-gray-900 mb-3">Current Members</h4>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {selectedGroup.members?.map((member: ChatMember) => (
-                      <div key={member.user.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div key={member.user?.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <span className="text-sm text-gray-700">
-                          {member.user.full_name || member.user.email}
+                          {member.user?.full_name || member.user?.email}
                         </span>
-                        {member.user.id !== selectedGroup.managed_by_id && (
+                        {member.user?.id !== selectedGroup.managed_by_id && (
                           <button
                             onClick={() => handleRemoveUser(member.user.id)}
                             disabled={removeUserMutation.isPending}

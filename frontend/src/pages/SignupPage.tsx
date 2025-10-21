@@ -29,7 +29,8 @@ const SignupPage: React.FC = () => {
       });
     },
     onError: (error: unknown) => {
-      const message = error.response?.data?.detail || 'Failed to create account';
+      const err = error as { response?: { data?: { detail?: string } } };
+      const message = err.response?.data?.detail || 'Failed to create account';
       if (message.includes('Email already registered')) {
         setErrors({ email: 'This email is already registered' });
       } else {

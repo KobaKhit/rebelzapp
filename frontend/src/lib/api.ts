@@ -202,8 +202,14 @@ export const eventsApi = {
 
 // AI API
 export interface AIResponse {
-  response: string;
+  response?: string;
   suggestions?: string[];
+  choices?: Array<{
+    message: {
+      role: string;
+      content: string;
+    };
+  }>;
 }
 
 export interface HelpTopic {

@@ -30,7 +30,7 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   type?: 'text' | 'events';
-  events?: Array<{ id: number; title: string; start_time: string }>;
+  events?: Array<{ id: number; title: string; start_time: string; type: string; status?: string }>;
   title?: string;
 }
 
@@ -242,7 +242,7 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
                 break;
                 
               case 'message' as AGUIEventType: {
-                const messageData = agUIEvent.data as AGUIMessage;
+                const messageData = agUIEvent.data as unknown as AGUIMessage;
                 if (messageData.role === 'assistant') {
                   setMessages(prev => [...prev, {
                     id: Date.now().toString(),

@@ -97,7 +97,7 @@ export default function AdminPage(){
           ).join(', ')
           errorMessage = `Validation error: ${errors}`
         } else {
-          errorMessage = error.response.data.detail
+          errorMessage = String(err.response?.data?.detail || 'Failed to create user')
         }
       }
       alert(errorMessage)

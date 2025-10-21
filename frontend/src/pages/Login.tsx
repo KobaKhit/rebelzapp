@@ -22,8 +22,9 @@ const Login: React.FC = () => {
     try {
       await login(email, password);
       navigate(from, { replace: true });
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } } };
+      setError(error.response?.data?.detail || 'Login failed');
     } finally {
       setIsLoading(false);
     }
