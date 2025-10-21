@@ -2,7 +2,7 @@
 # Builds both frontend and backend in a single container
 
 # Stage 1: Build Frontend
-FROM node:18-alpine as frontend-build
+FROM node:20-alpine as frontend-build
 
 WORKDIR /app/frontend
 
