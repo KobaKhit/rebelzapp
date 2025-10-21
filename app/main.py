@@ -81,7 +81,7 @@ app.include_router(permissions_router.router, prefix="/permissions", tags=["perm
 app.include_router(events_router.router, prefix="/events", tags=["events"]) 
 app.include_router(registrations_router.router, prefix="/registrations", tags=["registrations"])
 app.include_router(ai_router.router, prefix="/ai", tags=["ai"])
-app.include_router(copilotkit_router.router, prefix="/api", tags=["copilotkit"])
+app.include_router(copilotkit_router.router, prefix="/api/copilotkit", tags=["copilotkit"])
 app.include_router(chat_router.router, prefix="/chat", tags=["chat"])
 app.include_router(admin_chat_router.router, prefix="/chat", tags=["admin-chat"])
 app.include_router(websocket_router.router, prefix="/ws", tags=["websocket"]) 

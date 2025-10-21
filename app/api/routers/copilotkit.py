@@ -36,7 +36,7 @@ async def get_current_user_optional(
     
     return None
 
-@router.get("/copilotkit")
+@router.get("")
 async def copilotkit_sse(
     token: Optional[str] = None,
     authorization: Optional[str] = Header(None),
@@ -94,7 +94,7 @@ async def copilotkit_sse(
         }
     )
 
-@router.post("/copilotkit")
+@router.post("")
 async def copilotkit_runtime(
     request: Request,
     authorization: Optional[str] = Header(None),
