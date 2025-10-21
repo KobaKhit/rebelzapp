@@ -220,11 +220,15 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
           ? `/ai/events?token=${encodeURIComponent(token)}`
           : `/ai/events`;
         
+        console.log('Connecting to AG-UI SSE:', eventSourceUrl);
+        
         const eventSource = new EventSource(eventSourceUrl);
         eventSourceRef.current = eventSource;
 
         eventSource.onopen = () => {
-          console.log('AG-UI SSE connection opened');
+          console.log('AG-UI SSE connection opened (onopen fired)');
+          // Set optimistically connected - backend will confirm
+          setIsConnected(true);
         };
 
         eventSource.onmessage = (event) => {
@@ -234,13 +238,14 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
             // Handle different AG-UI event types
             switch (agUIEvent.type) {
               case 'connection':
-                setIsConnected(true);  // Set connected when we receive connection event
-                console.log('AG-UI connection confirmed:', agUIEvent.data);
+                setIsConnected(true);  // Confirm connection
+                console.log('AG-UI connection confirmed by backend:', agUIEvent.data);
                 break;
                 
               case 'heartbeat':
                 // Keep connection alive and ensure we're marked as connected
                 if (!isConnected) {
+                  console.log('Setting connected from heartbeat');
                   setIsConnected(true);
                 }
                 break;
