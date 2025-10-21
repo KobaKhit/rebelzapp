@@ -56,66 +56,8 @@ COPY start.sh ./
 # Copy built frontend from stage 1
 COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
-# Create nginx configuration for serving frontend + API
-RUN printf 'pid /tmp/nginx.pid;\n\
-error_log /tmp/nginx_error.log;\n\
-\n\
-events {\n\
-    worker_connections 1024;\n\
-}\n\
-\n\
-http {\n\
-    include /etc/nginx/mime.types;\n\
-    default_type application/octet-stream;\n\
-    \n\
-    access_log /tmp/nginx_access.log;\n\
-    client_body_temp_path /tmp/client_temp;\n\
-    proxy_temp_path /tmp/proxy_temp_path;\n\
-    fastcgi_temp_path /tmp/fastcgi_temp;\n\
-    uwsgi_temp_path /tmp/uwsgi_temp;\n\
-    scgi_temp_path /tmp/scgi_temp;\n\
-    \n\
-    sendfile on;\n\
-    keepalive_timeout 65;\n\
-    \n\
-    server {\n\
-        listen 80;\n\
-        server_name _;\n\
-        \n\
-        # Serve frontend static files\n\
-        location / {\n\
-            root /app/frontend/dist;\n\
-            try_files $uri $uri/ /index.html;\n\
-        }\n\
-        \n\
-        # Proxy API requests to FastAPI backend\n\
-        location /api/ {\n\
-            proxy_pass http://127.0.0.1:8000/;\n\
-            proxy_set_header Host $host;\n\
-            proxy_set_header X-Real-IP $remote_addr;\n\
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
-            proxy_set_header X-Forwarded-Proto $scheme;\n\
-        }\n\
-        \n\
-        # Proxy WebSocket connections\n\
-        location /ws/ {\n\
-            proxy_pass http://127.0.0.1:8000/ws/;\n\
-            proxy_http_version 1.1;\n\
-            proxy_set_header Upgrade $http_upgrade;\n\
-            proxy_set_header Connection "upgrade";\n\
-            proxy_set_header Host $host;\n\
-            proxy_set_header X-Real-IP $remote_addr;\n\
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
-            proxy_set_header X-Forwarded-Proto $scheme;\n\
-        }\n\
-        \n\
-        # Health check endpoint\n\
-        location /health {\n\
-            proxy_pass http://127.0.0.1:8000/health;\n\
-        }\n\
-    }\n\
-}\n\
-' > /etc/nginx/nginx.conf
+# Copy production nginx configuration
+COPY nginx.prod.conf /etc/nginx/nginx.conf
 
 # Create uploads directory and temp directories for nginx
 RUN mkdir -p /app/uploads /tmp/client_temp /tmp/proxy_temp_path /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
