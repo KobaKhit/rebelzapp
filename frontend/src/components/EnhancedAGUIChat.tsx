@@ -224,8 +224,7 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
         eventSourceRef.current = eventSource;
 
         eventSource.onopen = () => {
-          setIsConnected(true);
-          console.log('AG-UI SSE connection established');
+          console.log('AG-UI SSE connection opened');
         };
 
         eventSource.onmessage = (event) => {
@@ -235,11 +234,15 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
             // Handle different AG-UI event types
             switch (agUIEvent.type) {
               case 'connection':
+                setIsConnected(true);  // Set connected when we receive connection event
                 console.log('AG-UI connection confirmed:', agUIEvent.data);
                 break;
                 
               case 'heartbeat':
-                // Keep connection alive
+                // Keep connection alive and ensure we're marked as connected
+                if (!isConnected) {
+                  setIsConnected(true);
+                }
                 break;
                 
               case 'message':
@@ -283,10 +286,13 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
           setIsConnected(false);
           setIsTyping(false);
           console.error('AG-UI SSE connection error:', error);
+          console.error('EventSource readyState:', eventSource.readyState);
+          console.error('EventSource URL:', eventSourceUrl);
           
           // Attempt to reconnect after a delay
           setTimeout(() => {
             if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
+              console.log('Attempting to reconnect to AG-UI SSE...');
               connectToAGUI();
             }
           }, 5000);
