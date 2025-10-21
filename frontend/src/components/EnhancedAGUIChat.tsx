@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { useCopilotAction, useCopilotReadable, useCopilotChat } from '@copilotkit/react-core';
+import { useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
 import { CopilotTextarea } from '@copilotkit/react-textarea';
 import AGUIEventCard from './AGUIEventCard';
 
@@ -45,12 +45,8 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
 
-  // Use CopilotKit's built-in chat hook for better integration
-  const { 
-    isLoading: copilotLoading,
-    messages: copilotMessages,
-    appendMessage
-  } = useCopilotChat();
+  // CopilotKit's chat hook for better integration (optional)
+  // Note: useCopilotChat doesn't expose messages directly, we manage our own state
 
   // Make chat context readable to CopilotKit
   useCopilotReadable({

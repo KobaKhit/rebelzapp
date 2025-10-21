@@ -17,10 +17,9 @@ export const CopilotKitProvider: React.FC<CopilotKitProviderProps> = ({
   
   // Memoize headers to prevent unnecessary re-renders
   const headers = useMemo(() => {
-    return token ? {
+    if (!token) return undefined;
+    return {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    } : {
       'Content-Type': 'application/json'
     };
   }, [token]);
@@ -53,10 +52,9 @@ export const CopilotKitWrapper: React.FC<CopilotKitWrapperProps> = ({
   
   // Memoize headers to prevent unnecessary re-renders
   const headers = useMemo(() => {
-    return token ? {
+    if (!token) return undefined;
+    return {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    } : {
       'Content-Type': 'application/json'
     };
   }, [token]);
