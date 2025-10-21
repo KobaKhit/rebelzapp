@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { eventsApi, registrationsApi } from '../lib/api';
-import { useAuth } from '../lib/auth';
 import {
   CalendarIcon,
   ClockIcon,
@@ -20,10 +19,8 @@ import {
   XCircleIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
-  StarIcon
 } from '@heroicons/react/24/outline';
 import {
-  HeartIcon as HeartSolidIcon,
   StarIcon as StarSolidIcon,
 } from '@heroicons/react/24/solid';
 import Layout from '../components/Layout';
@@ -38,7 +35,6 @@ interface RegistrationFormData {
 const EventDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);

@@ -10,13 +10,6 @@ import {
   ClockIcon,
   UserGroupIcon,
   ArrowLeftIcon,
-  AcademicCapIcon,
-  TrophyIcon,
-  WrenchScrewdriverIcon,
-  PresentationChartLineIcon,
-  FireIcon,
-  UsersIcon,
-  BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 
 // Event type field definitions
@@ -151,7 +144,7 @@ const NewEvent: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       navigate('/admin/events');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error creating event:', error);
       if (error.response?.data?.detail) {
         setErrors({ general: error.response.data.detail });
@@ -169,7 +162,7 @@ const NewEvent: React.FC = () => {
     if (name.startsWith('data.')) {
       // Handle data fields
       const fieldName = name.replace('data.', '');
-      let processedValue: any = value;
+      let processedValue: string | number | boolean = value;
       
       if (type === 'checkbox') {
         processedValue = (e.target as HTMLInputElement).checked;
@@ -242,7 +235,7 @@ const NewEvent: React.FC = () => {
         acc[key] = value;
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, unknown>);
 
     createMutation.mutate({
       ...formData,
@@ -435,7 +428,7 @@ const NewEvent: React.FC = () => {
                   } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 >
                   <option value="">Select event type</option>
-                  {Object.entries(eventTypes).map(([key, value]) => (
+                  {Object.keys(eventTypes).map((key) => (
                     <option key={key} value={key}>
                       {key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ')}
                     </option>

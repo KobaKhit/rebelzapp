@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import Loading from './Loading';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -13,28 +14,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredPermission,
   requiredRole,
 }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, hasPermission, hasRole } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requiredPermission && !user.roles.includes('admin')) {
-    // For now, only admin can access protected routes
-    // This should be enhanced with proper permission checking
+  if (requiredPermission && !hasPermission(requiredPermission)) {
     return <Navigate to="/" replace />;
   }
 
-  if (requiredRole && !user.roles.includes(requiredRole)) {
+  if (requiredRole && !hasRole(requiredRole)) {
     return <Navigate to="/" replace />;
   }
 

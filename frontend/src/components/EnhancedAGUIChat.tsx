@@ -12,7 +12,7 @@ interface AGUIMessage {
 
 interface AGUIEvent {
   type: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 type AGUIEventType = string;
@@ -30,7 +30,7 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   type?: 'text' | 'events';
-  events?: any[];
+  events?: Array<{ id: number; title: string; start_time: string }>;
   title?: string;
 }
 
@@ -155,8 +155,8 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
         });
 
         if (response.ok) {
-          const events = await response.json();
-          return `Found ${events.length} events matching your criteria: ${events.map((e: any) => e.title).join(', ')}`;
+          const events = await response.json() as Array<{ title: string }>;
+          return `Found ${events.length} events matching your criteria: ${events.map((e) => e.title).join(', ')}`;
         } else {
           throw new Error('Failed to search events');
         }
@@ -241,7 +241,7 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
                 // Keep connection alive, no action needed
                 break;
                 
-              case 'message' as AGUIEventType:
+              case 'message' as AGUIEventType: {
                 const messageData = agUIEvent.data as AGUIMessage;
                 if (messageData.role === 'assistant') {
                   setMessages(prev => [...prev, {
@@ -254,6 +254,7 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
                 }
                 onMessage?.(messageData);
                 break;
+              }
 
               case 'thinking' as AGUIEventType:
                 setIsTyping(true);

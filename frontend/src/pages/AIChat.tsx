@@ -21,7 +21,7 @@ interface AGUIMessage {
 
 interface AGUIEvent {
   type: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 const Chat: React.FC = () => {
@@ -93,7 +93,7 @@ const Chat: React.FC = () => {
     setInputMessage(suggestion);
   };
 
-  const handleHelpTopicClick = (topic: any) => {
+  const handleHelpTopicClick = (topic: { title: string; description: string }) => {
     const message = `Tell me about ${topic.title.toLowerCase()}`;
     setInputMessage(message);
   };

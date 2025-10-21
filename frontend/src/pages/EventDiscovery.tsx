@@ -4,7 +4,6 @@ import { eventsApi } from '../lib/api';
 import { Link } from 'react-router-dom';
 import {
   CalendarIcon,
-  ClockIcon,
   MapPinIcon,
   UserGroupIcon,
   TrophyIcon,
@@ -16,7 +15,6 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   XMarkIcon,
-  StarIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
 import {
@@ -83,19 +81,22 @@ const EventDiscovery: React.FC = () => {
         const today = new Date();
         
         switch (filters.date) {
-          case 'today':
+          case 'today': {
             if (eventDate.toDateString() !== today.toDateString()) return false;
             break;
-          case 'tomorrow':
+          }
+          case 'tomorrow': {
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
             if (eventDate.toDateString() !== tomorrow.toDateString()) return false;
             break;
-          case 'this-week':
+          }
+          case 'this-week': {
             const weekEnd = new Date(today);
             weekEnd.setDate(weekEnd.getDate() + 7);
             if (eventDate < today || eventDate > weekEnd) return false;
             break;
+          }
           case 'this-month':
             if (eventDate.getMonth() !== today.getMonth() || eventDate.getFullYear() !== today.getFullYear()) return false;
             break;

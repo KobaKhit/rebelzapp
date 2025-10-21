@@ -105,7 +105,7 @@ const Events: React.FC = () => {
             className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
             <option value="">All Types</option>
-            {Object.entries(eventTypes).map(([key, value]) => (
+            {Object.keys(eventTypes).map((key) => (
               <option key={key} value={key}>
                 {key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ')}
               </option>

@@ -17,30 +17,19 @@ import {
   AcademicCapIcon,
 } from '@heroicons/react/24/outline';
 
-interface ChatGroup {
-  id: number;
-  name: string;
-  description?: string;
-  is_private: boolean;
-  group_type: 'user_created' | 'admin_managed' | 'instructor_managed';
+import type { User, ChatGroup as ChatGroupType, ChatMessageResponse } from '../types';
+
+interface ChatGroup extends ChatGroupType {
   created_by_id: number;
   managed_by_id?: number;
-  created_at: string;
-  updated_at: string;
-  created_by?: any;
-  managed_by?: any;
-  members: any[];
+  created_by?: User;
+  managed_by?: User;
   member_count?: number;
 }
 
-interface ChatMessage {
-  id: number;
-  group_id: number;
+interface ChatMessage extends ChatMessageResponse {
   sender_id: number;
-  content: string;
-  message_type: string;
-  created_at: string;
-  sender?: any;
+  sender?: User;
 }
 
 const Chat: React.FC = () => {
@@ -198,6 +187,7 @@ const Chat: React.FC = () => {
         };
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup, user, queryClient]);
 
   // Scroll to bottom when messages change

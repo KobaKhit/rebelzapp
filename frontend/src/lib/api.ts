@@ -12,6 +12,11 @@ import type {
   EventTypes,
   Registration,
   RegistrationCreate,
+  ChatGroup,
+  ChatGroupCreate,
+  ChatGroupUpdate,
+  ChatMessageResponse,
+  ManagedChatGroupCreate,
 } from '../types';
 import type { UserCreate, UserUpdate, Token } from '../types/auth';
 
@@ -196,9 +201,21 @@ export const eventsApi = {
 };
 
 // AI API
+export interface AIResponse {
+  response: string;
+  suggestions?: string[];
+}
+
+export interface HelpTopic {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+}
+
 export const aiApi = {
-  chat: async (messages: ChatMessage[]): Promise<any> => {
-    const response = await api.post('/ai/chat', { messages });
+  chat: async (messages: ChatMessage[]): Promise<AIResponse> => {
+    const response = await api.post<AIResponse>('/ai/chat', { messages });
     return response.data;
   },
 
@@ -207,8 +224,8 @@ export const aiApi = {
     return response.data;
   },
 
-  getHelpTopics: async (): Promise<any[]> => {
-    const response = await api.get<any[]>('/ai/help/topics');
+  getHelpTopics: async (): Promise<HelpTopic[]> => {
+    const response = await api.get<HelpTopic[]>('/ai/help/topics');
     return response.data;
   },
 };
@@ -241,23 +258,23 @@ export const registrationsApi = {
 // Chat API
 export const chatApi = {
   // Groups
-  getGroups: async (): Promise<any[]> => {
-    const response = await api.get('/chat/groups');
+  getGroups: async (): Promise<ChatGroup[]> => {
+    const response = await api.get<ChatGroup[]>('/chat/groups');
     return response.data;
   },
 
-  getGroup: async (id: number): Promise<any> => {
-    const response = await api.get(`/chat/groups/${id}`);
+  getGroup: async (id: number): Promise<ChatGroup> => {
+    const response = await api.get<ChatGroup>(`/chat/groups/${id}`);
     return response.data;
   },
 
-  createGroup: async (groupData: { name: string; description?: string; is_private: boolean }): Promise<any> => {
-    const response = await api.post('/chat/groups', groupData);
+  createGroup: async (groupData: ChatGroupCreate): Promise<ChatGroup> => {
+    const response = await api.post<ChatGroup>('/chat/groups', groupData);
     return response.data;
   },
 
-  updateGroup: async (id: number, groupData: { name?: string; description?: string; is_private?: boolean }): Promise<any> => {
-    const response = await api.put(`/chat/groups/${id}`, groupData);
+  updateGroup: async (id: number, groupData: ChatGroupUpdate): Promise<ChatGroup> => {
+    const response = await api.put<ChatGroup>(`/chat/groups/${id}`, groupData);
     return response.data;
   },
 
@@ -265,8 +282,8 @@ export const chatApi = {
     await api.delete(`/chat/groups/${id}`);
   },
 
-  searchPublicGroups: async (query: string): Promise<any[]> => {
-    const response = await api.get(`/chat/search/groups?q=${encodeURIComponent(query)}`);
+  searchPublicGroups: async (query: string): Promise<ChatGroup[]> => {
+    const response = await api.get<ChatGroup[]>(`/chat/search/groups?q=${encodeURIComponent(query)}`);
     return response.data;
   },
 
@@ -275,7 +292,7 @@ export const chatApi = {
   },
 
   // Members
-  addMember: async (groupId: number, userId: number, isAdmin: boolean = false): Promise<void> => {
+  addMember: async (groupId: number, userId: number, isAdmin = false): Promise<void> => {
     await api.post(`/chat/groups/${groupId}/members`, { user_id: userId, is_admin: isAdmin });
   },
 
@@ -284,13 +301,13 @@ export const chatApi = {
   },
 
   // Messages
-  getMessages: async (groupId: number, skip: number = 0, limit: number = 50): Promise<any[]> => {
-    const response = await api.get(`/chat/groups/${groupId}/messages?skip=${skip}&limit=${limit}`);
+  getMessages: async (groupId: number, skip = 0, limit = 50): Promise<ChatMessageResponse[]> => {
+    const response = await api.get<ChatMessageResponse[]>(`/chat/groups/${groupId}/messages?skip=${skip}&limit=${limit}`);
     return response.data;
   },
 
-  sendMessage: async (groupId: number, content: string, messageType: string = 'text'): Promise<any> => {
-    const response = await api.post(`/chat/groups/${groupId}/messages`, {
+  sendMessage: async (groupId: number, content: string, messageType = 'text'): Promise<ChatMessageResponse> => {
+    const response = await api.post<ChatMessageResponse>(`/chat/groups/${groupId}/messages`, {
       group_id: groupId,
       content,
       message_type: messageType
@@ -302,29 +319,23 @@ export const chatApi = {
 // Admin Chat API
 export const adminChatApi = {
   // Admin/Instructor managed groups
-  createManagedGroup: async (groupData: { 
-    name: string; 
-    description?: string; 
-    is_private: boolean; 
-    group_type: 'admin_managed' | 'instructor_managed';
-    member_ids: number[];
-  }): Promise<any> => {
-    const response = await api.post('/chat/admin/groups', groupData);
+  createManagedGroup: async (groupData: ManagedChatGroupCreate): Promise<ChatGroup> => {
+    const response = await api.post<ChatGroup>('/chat/admin/groups', groupData);
     return response.data;
   },
 
-  getManagedGroups: async (): Promise<any[]> => {
-    const response = await api.get('/chat/admin/groups');
+  getManagedGroups: async (): Promise<ChatGroup[]> => {
+    const response = await api.get<ChatGroup[]>('/chat/admin/groups');
     return response.data;
   },
 
-  getAllManagedGroups: async (): Promise<any[]> => {
-    const response = await api.get('/chat/admin/groups/all');
+  getAllManagedGroups: async (): Promise<ChatGroup[]> => {
+    const response = await api.get<ChatGroup[]>('/chat/admin/groups/all');
     return response.data;
   },
 
-  updateManagedGroup: async (id: number, groupData: { name?: string; description?: string; is_private?: boolean }): Promise<any> => {
-    const response = await api.put(`/chat/admin/groups/${id}`, groupData);
+  updateManagedGroup: async (id: number, groupData: ChatGroupUpdate): Promise<ChatGroup> => {
+    const response = await api.put<ChatGroup>(`/chat/admin/groups/${id}`, groupData);
     return response.data;
   },
 

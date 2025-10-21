@@ -12,7 +12,6 @@ import {
   ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
   UserIcon,
-  SparklesIcon,
   ArrowsRightLeftIcon,
   Bars3Icon,
   XMarkIcon,
@@ -83,9 +82,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'AI Assistant', href: '/ai-chat', icon: ChatBubbleBottomCenterTextIcon, current: location.pathname === '/ai-chat' },
   ];
 
+  interface NavItem {
+    name: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+    current: boolean;
+    permission?: string;
+    alternativePermission?: string;
+  }
+
   const navigation = isAdmin ? adminNavigation : consumerNavigation;
-  const filteredNavigation = navigation.filter(item => {
-    const navItem = item as any;
+  const filteredNavigation = navigation.filter((item): item is NavItem => {
+    const navItem = item as NavItem;
     return !navItem.permission || hasPermission(navItem.permission) || (navItem.alternativePermission && hasPermission(navItem.alternativePermission));
   });
 

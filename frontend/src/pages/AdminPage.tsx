@@ -62,7 +62,10 @@ export default function AdminPage(){
     }
   }
 
-  useEffect(()=>{ loadAll() }, [])
+  useEffect(()=>{ 
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
 
   const createUser = async (e: React.FormEvent) => {
@@ -80,16 +83,17 @@ export default function AdminPage(){
       setNewUser({ email: '', full_name: '', password: '' })
       await loadAll()
       alert('User created successfully!')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to create user:', error)
       
       // Show detailed error message
       let errorMessage = 'Failed to create user'
-      if (error.response?.data?.detail) {
-        if (Array.isArray(error.response.data.detail)) {
+      const err = error as { response?: { data?: { detail?: unknown } } };
+      if (err.response?.data?.detail) {
+        if (Array.isArray(err.response.data.detail)) {
           // Pydantic validation errors
-          const errors = error.response.data.detail.map((err: any) => 
-            `${err.loc.join('.')}: ${err.msg}`
+          const errors = err.response.data.detail.map((e: { loc: string[]; msg: string }) => 
+            `${e.loc.join('.')}: ${e.msg}`
           ).join(', ')
           errorMessage = `Validation error: ${errors}`
         } else {

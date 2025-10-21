@@ -13,27 +13,14 @@ import {
   UserMinusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import type { User, ChatGroup as ChatGroupType, ChatMember } from '../types';
 
-interface User {
-  id: number;
-  email: string;
-  full_name?: string;
-  roles: string[];
-}
-
-interface ChatGroup {
-  id: number;
-  name: string;
-  description?: string;
-  is_private: boolean;
-  group_type: 'admin_managed' | 'instructor_managed';
+interface ChatGroup extends ChatGroupType {
   created_by_id: number;
   managed_by_id?: number;
-  created_at: string;
-  updated_at: string;
-  created_by?: any;
-  managed_by?: any;
-  members: any[];
+  created_by?: User;
+  managed_by?: User;
+  members: ChatMember[];
   member_count?: number;
 }
 
@@ -374,7 +361,7 @@ const AdminChat: React.FC = () => {
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-3">Current Members</h4>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {selectedGroup.members?.map((member: any) => (
+                    {selectedGroup.members?.map((member: ChatMember) => (
                       <div key={member.user.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <span className="text-sm text-gray-700">
                           {member.user.full_name || member.user.email}
@@ -398,7 +385,7 @@ const AdminChat: React.FC = () => {
                   <h4 className="text-sm font-medium text-gray-900 mb-3">Available Users</h4>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {allUsers
-                      .filter((u: User) => !selectedGroup.members?.some((m: any) => m.user.id === u.id))
+                      .filter((u: User) => !selectedGroup.members?.some((m: ChatMember) => m.user?.id === u.id))
                       .map((u: User) => (
                         <div key={u.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                           <span className="text-sm text-gray-700">

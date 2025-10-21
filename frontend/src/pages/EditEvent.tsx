@@ -10,13 +10,6 @@ import {
   ClockIcon,
   UserGroupIcon,
   ArrowLeftIcon,
-  AcademicCapIcon,
-  TrophyIcon,
-  WrenchScrewdriverIcon,
-  PresentationChartLineIcon,
-  FireIcon,
-  UsersIcon,
-  BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 
 // Event type field definitions (same as NewEvent)
@@ -160,7 +153,7 @@ const EditEvent: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['event', id] });
       navigate('/admin/events');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error updating event:', error);
       if (error.response?.data?.detail) {
         setErrors({ general: error.response.data.detail });
@@ -178,7 +171,7 @@ const EditEvent: React.FC = () => {
     if (name.startsWith('data.')) {
       // Handle data fields
       const fieldName = name.replace('data.', '');
-      let processedValue: any = value;
+      let processedValue: string | number | boolean = value;
       
       if (type === 'checkbox') {
         processedValue = (e.target as HTMLInputElement).checked;
@@ -251,7 +244,7 @@ const EditEvent: React.FC = () => {
         acc[key] = value;
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, unknown>);
 
     updateMutation.mutate({
       title: formData.title.trim(),

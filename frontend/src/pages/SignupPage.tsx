@@ -28,7 +28,7 @@ const SignupPage: React.FC = () => {
         state: { message: 'Account created successfully! Please log in.' }
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       const message = error.response?.data?.detail || 'Failed to create account';
       if (message.includes('Email already registered')) {
         setErrors({ email: 'This email is already registered' });

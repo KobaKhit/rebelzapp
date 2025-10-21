@@ -28,7 +28,7 @@ export interface Event {
   location?: string;
   start_time: string;
   end_time: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   capacity?: number;
   is_published: boolean;
   created_by_user_id?: number;
@@ -43,7 +43,7 @@ export interface EventCreate {
   location?: string;
   start_time: string;
   end_time: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   capacity?: number;
   is_published: boolean;
 }
@@ -54,7 +54,7 @@ export interface EventUpdate {
   location?: string;
   start_time?: string;
   end_time?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   capacity?: number;
   is_published?: boolean;
 }
@@ -106,4 +106,54 @@ export interface RegistrationCreate {
   special_needs?: string;
 }
 
-// Types are already exported above - no need to re-export
+// Chat types
+export interface ChatGroup {
+  id: number;
+  name: string;
+  description?: string;
+  is_private: boolean;
+  group_type?: 'user_created' | 'admin_managed' | 'instructor_managed';
+  created_by_user_id?: number;
+  created_at: string;
+  updated_at: string;
+  members?: ChatMember[];
+  last_message?: ChatMessageResponse;
+}
+
+export interface ChatMember {
+  user_id: number;
+  group_id: number;
+  is_admin: boolean;
+  joined_at: string;
+  user?: User;
+}
+
+export interface ChatMessageResponse {
+  id: number;
+  group_id: number;
+  user_id: number;
+  content: string;
+  message_type: string;
+  created_at: string;
+  user?: User;
+}
+
+export interface ChatGroupCreate {
+  name: string;
+  description?: string;
+  is_private: boolean;
+}
+
+export interface ChatGroupUpdate {
+  name?: string;
+  description?: string;
+  is_private?: boolean;
+}
+
+export interface ManagedChatGroupCreate {
+  name: string;
+  description?: string;
+  is_private: boolean;
+  group_type: 'admin_managed' | 'instructor_managed';
+  member_ids: number[];
+}

@@ -20,13 +20,24 @@ import {
   ChatBubbleLeftEllipsisIcon,
   ShareIcon
 } from '@heroicons/react/24/outline';
-import {
-  HeartIcon as HeartSolidIcon,
-} from '@heroicons/react/24/solid';
 import Layout from '../components/Layout';
 
 const ConsumerDashboard: React.FC = () => {
   const { user } = useAuth();
+
+  const { data: events = [] } = useQuery({
+    queryKey: ['events'],
+    queryFn: () => eventsApi.getEvents(),
+    enabled: !!user,
+  });
+
+  const { data: myRegistrations = [], error: registrationsError } = useQuery({
+    queryKey: ['my-registrations'],
+    queryFn: () => registrationsApi.getMyRegistrations(),
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!user,
+  });
 
   // Show loading state for initial load
   if (!user) {
@@ -50,18 +61,6 @@ const ConsumerDashboard: React.FC = () => {
       </Layout>
     );
   }
-
-  const { data: events = [] } = useQuery({
-    queryKey: ['events'],
-    queryFn: () => eventsApi.getEvents(),
-  });
-
-  const { data: myRegistrations = [], isLoading: registrationsLoading, error: registrationsError } = useQuery({
-    queryKey: ['my-registrations'],
-    queryFn: () => registrationsApi.getMyRegistrations(),
-    retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
 
   // Filter published events and sort by date
   const upcomingEvents = events
