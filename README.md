@@ -182,11 +182,9 @@ ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 - **Docker**: Includes PostgreSQL service
 
 ### Environment Templates
-- `env.example` - General template with all options
-- `env.development.template` - Pre-configured for local development
-- `env.production.template` - Pre-configured for DigitalOcean
+- `env.example` - Comprehensive template with all configuration options for both development and production
 
-See [DIGITALOCEAN_SETUP.md](DIGITALOCEAN_SETUP.md) for detailed database configuration guide.
+See [docs/DIGITALOCEAN_SETUP.md](docs/DIGITALOCEAN_SETUP.md) for detailed database configuration guide.
 
 ## 🎯 API Endpoints
 
@@ -264,6 +262,16 @@ docker-compose up -d
 ## 📄 License
 
 MIT License - see LICENSE file for details.
+
+## 📚 Documentation
+
+Additional documentation is available in the `docs/` folder:
+- [Quick Start Guide](QUICK_START.md) - Get started in minutes
+- [Setup Complete](docs/SETUP_COMPLETE.md) - Comprehensive setup guide
+- [DigitalOcean Setup](docs/DIGITALOCEAN_SETUP.md) - Production deployment guide
+- [Security Guide](docs/SECURITY.md) - Security implementation details
+- [Deployment Guide](docs/DEPLOYMENT.md) - Deployment instructions
+- [Development Summary](docs/DEVELOPMENT_SUMMARY.md) - Development notes
 
 ## 🆘 Support
 

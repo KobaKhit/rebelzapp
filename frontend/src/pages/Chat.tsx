@@ -273,32 +273,33 @@ const Chat: React.FC = () => {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100vh-8rem)] max-w-7xl mx-auto bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-8rem)] max-w-7xl mx-auto bg-white shadow-sm rounded-lg overflow-hidden">
         {/* Sidebar */}
-        <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
+        <div className="w-full lg:w-80 bg-gray-50 border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col max-h-48 lg:max-h-none">
           {/* Header */}
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <ChatBubbleLeftRightIcon className="h-5 w-5 text-indigo-500" />
-                Chat Groups
+          <div className="p-3 sm:p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <ChatBubbleLeftRightIcon className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
+                <span className="hidden sm:inline">Chat Groups</span>
+                <span className="sm:hidden">Groups</span>
               </h2>
-               <div className="flex gap-2">
+               <div className="flex gap-1 sm:gap-2">
                  {canCreateGroups && (
                    <>
                      <button
                        onClick={() => setShowJoinGroup(true)}
-                       className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                       className="p-1.5 sm:p-2 text-gray-500 hover:text-secondary hover:bg-secondary-50 rounded-md transition-colors"
                        title="Join Group"
                      >
-                       <MagnifyingGlassIcon className="h-4 w-4" />
+                       <MagnifyingGlassIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                      </button>
                      <button
                        onClick={() => setShowCreateGroup(true)}
-                       className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                       className="p-1.5 sm:p-2 text-gray-500 hover:text-secondary hover:bg-secondary-50 rounded-md transition-colors"
                        title="Create Group"
                      >
-                       <PlusIcon className="h-4 w-4" />
+                       <PlusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                      </button>
                    </>
                  )}
@@ -309,36 +310,37 @@ const Chat: React.FC = () => {
           {/* Groups List */}
           <div className="flex-1 overflow-y-auto">
              {groups.length === 0 ? (
-               <div className="p-4 text-center text-gray-500">
-                 <UserGroupIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-                 <p className="text-sm">No groups yet</p>
+               <div className="p-3 sm:p-4 text-center text-gray-500">
+                 <UserGroupIcon className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 text-gray-300" />
+                 <p className="text-xs sm:text-sm">No groups yet</p>
                  {canCreateGroups ? (
-                   <p className="text-xs">Create or join a group to start chatting</p>
+                   <p className="text-xs hidden sm:block">Create or join a group to start chatting</p>
                  ) : (
-                   <p className="text-xs">Wait to be added to a group by an admin or instructor</p>
+                   <p className="text-xs hidden sm:block">Wait to be added to a group by an admin or instructor</p>
                  )}
                </div>
              ) : (
-              <div className="space-y-1 p-2">
+              <div className="space-y-1 p-1 sm:p-2">
                 {groups.map((group: ChatGroup) => (
                   <button
                     key={group.id}
                     onClick={() => setSelectedGroup(group)}
-                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                    className={`w-full text-left p-2 sm:p-3 rounded-lg transition-colors ${
                       selectedGroup?.id === group.id
-                        ? 'bg-indigo-100 border-indigo-200'
+                        ? 'bg-secondary-50 border border-secondary-200'
                         : 'hover:bg-gray-100'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                         {getGroupIcon(group)}
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium text-gray-900 truncate">{group.name}</p>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <span>{group.member_count || group.members?.length || 0} members</span>
+                          <p className="font-medium text-gray-900 truncate text-sm sm:text-base">{group.name}</p>
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-500">
+                            <span className="hidden sm:inline">{group.member_count || group.members?.length || 0} members</span>
+                            <span className="sm:hidden">{group.member_count || group.members?.length || 0}</span>
                             {group.group_type !== 'user_created' && (
-                              <span className="text-xs px-1.5 py-0.5 bg-gray-100 rounded text-gray-600">
+                              <span className="text-xs px-1 sm:px-1.5 py-0.5 bg-gray-100 rounded text-gray-600">
                                 {group.group_type === 'admin_managed' ? 'Admin' : 'Instructor'}
                               </span>
                             )}
@@ -358,31 +360,31 @@ const Chat: React.FC = () => {
           {selectedGroup ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 bg-white">
+              <div className="p-3 sm:p-4 border-b border-gray-200 bg-white">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2 truncate">
                       {getGroupIcon(selectedGroup)}
-                      {selectedGroup.name}
+                      <span className="truncate">{selectedGroup.name}</span>
                     </h3>
                     {selectedGroup.description && (
-                      <p className="text-sm text-gray-600">{selectedGroup.description}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">{selectedGroup.description}</p>
                     )}
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 mt-1">
                       <span>{selectedGroup.member_count || selectedGroup.members?.length || 0} members</span>
                       {selectedGroup.group_type !== 'user_created' && selectedGroup.managed_by && (
-                        <span>
+                        <span className="hidden sm:inline truncate">
                           Managed by {selectedGroup.managed_by.full_name || selectedGroup.managed_by.email}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     <button 
                       onClick={() => setShowGroupMenu(!showGroupMenu)}
-                      className="p-2 text-gray-400 hover:text-gray-600 rounded-md"
+                      className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 rounded-md"
                     >
-                      <EllipsisVerticalIcon className="h-5 w-5" />
+                      <EllipsisVerticalIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
                     
                     {showGroupMenu && (
@@ -417,12 +419,12 @@ const Chat: React.FC = () => {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4">
                 {messages.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="text-center py-8 sm:py-12">
+                    <ChatBubbleLeftRightIcon className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400" />
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-xs sm:text-sm text-gray-500">
                       Start the conversation by sending a message.
                     </p>
                   </div>
@@ -436,28 +438,28 @@ const Chat: React.FC = () => {
                       <div key={message.id}>
                         {showDate && (
                           <div className="text-center py-2">
-                            <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 sm:px-3 py-1 rounded-full">
                               {formatDate(message.created_at)}
                             </span>
                           </div>
                         )}
                         <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-xs lg:max-w-md ${isOwnMessage ? 'order-2' : 'order-1'}`}>
+                          <div className={`max-w-[75%] sm:max-w-xs lg:max-w-md ${isOwnMessage ? 'order-2' : 'order-1'}`}>
                             {!isOwnMessage && (
-                              <p className="text-xs text-gray-500 mb-1 px-3">
+                              <p className="text-xs text-gray-500 mb-1 px-2 sm:px-3">
                                 {message.sender?.full_name || message.sender?.email || 'Unknown User'}
                               </p>
                             )}
                             <div
-                              className={`px-4 py-2 rounded-lg ${
+                              className={`px-3 sm:px-4 py-2 rounded-lg ${
                                 isOwnMessage
-                                  ? 'bg-indigo-600 text-white'
+                                  ? 'bg-secondary text-white'
                                   : 'bg-gray-100 text-gray-900'
                               }`}
                             >
-                              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                              <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                               <p className={`text-xs mt-1 ${
-                                isOwnMessage ? 'text-indigo-200' : 'text-gray-500'
+                                isOwnMessage ? 'text-secondary-200' : 'text-gray-500'
                               }`}>
                                 {formatTime(message.created_at)}
                               </p>
@@ -472,20 +474,20 @@ const Chat: React.FC = () => {
               </div>
 
               {/* Message Input */}
-              <div className="border-t border-gray-200 p-4">
+              <div className="border-t border-gray-200 p-2 sm:p-4">
                 <form onSubmit={handleSendMessage} className="flex space-x-2">
                   <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
                     disabled={sendMessageMutation.isPending}
                   />
                   <button
                     type="submit"
                     disabled={!newMessage.trim() || sendMessageMutation.isPending}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-secondary hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <PaperAirplaneIcon className="h-4 w-4" />
                   </button>
@@ -520,7 +522,7 @@ const Chat: React.FC = () => {
                   type="text"
                   value={newGroupData.name}
                   onChange={(e) => setNewGroupData({ ...newGroupData, name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary"
                   required
                 />
               </div>
@@ -531,7 +533,7 @@ const Chat: React.FC = () => {
                 <textarea
                   value={newGroupData.description}
                   onChange={(e) => setNewGroupData({ ...newGroupData, description: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary"
                   rows={3}
                 />
               </div>
@@ -541,7 +543,7 @@ const Chat: React.FC = () => {
                   id="is_private"
                   checked={newGroupData.is_private}
                   onChange={(e) => setNewGroupData({ ...newGroupData, is_private: e.target.checked })}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-secondary focus:ring-secondary border-gray-300 rounded"
                 />
                 <label htmlFor="is_private" className="ml-2 block text-sm text-gray-700">
                   Private group (invite only)
@@ -558,7 +560,7 @@ const Chat: React.FC = () => {
                 <button
                   type="submit"
                   disabled={createGroupMutation.isPending}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-white bg-secondary rounded-md hover:bg-secondary-700 disabled:opacity-50"
                 >
                   {createGroupMutation.isPending ? 'Creating...' : 'Create Group'}
                 </button>
@@ -583,7 +585,7 @@ const Chat: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for public groups..."
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary"
                 />
               </div>
               {publicGroups.length > 0 && (
@@ -602,7 +604,7 @@ const Chat: React.FC = () => {
                       <button
                         onClick={() => joinGroupMutation.mutate(group.id)}
                         disabled={joinGroupMutation.isPending}
-                        className="px-3 py-1 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                        className="px-3 py-1 text-sm font-medium text-white bg-secondary rounded-md hover:bg-secondary-700 disabled:opacity-50"
                       >
                         Join
                       </button>

@@ -219,16 +219,16 @@ const UserProfile: React.FC = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white bg-opacity-10 rounded-full -mr-20 -mt-20"></div>
-          <div className="absolute bottom-0 right-10 w-24 h-24 bg-white bg-opacity-10 rounded-full"></div>
+        <div className="bg-primary rounded-2xl p-4 sm:p-8 mb-6 sm:mb-8 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-secondary bg-opacity-20 rounded-full -mr-16 sm:-mr-20 -mt-16 sm:-mt-20"></div>
+          <div className="absolute bottom-0 right-6 sm:right-10 w-16 h-16 sm:w-24 sm:h-24 bg-secondary bg-opacity-20 rounded-full"></div>
           
-          <div className="relative z-10 flex items-start justify-between">
-            <div className="flex items-center space-x-6">
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
               <div className="relative">
-                <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center overflow-hidden">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center overflow-hidden">
                   {user?.profile_picture ? (
                     <img 
                       src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}${user.profile_picture}`}
@@ -236,11 +236,11 @@ const UserProfile: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <UserCircleIcon className="w-16 h-16" />
+                    <UserCircleIcon className="w-12 h-12 sm:w-16 sm:h-16" />
                   )}
                 </div>
-                <label className="absolute bottom-0 right-0 w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all cursor-pointer">
-                  <CameraIcon className="w-4 h-4" />
+                <label className="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 bg-secondary hover:bg-secondary-700 rounded-full flex items-center justify-center transition-all cursor-pointer">
+                  <CameraIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                   <input
                     type="file"
                     accept="image/*"
@@ -251,31 +251,31 @@ const UserProfile: React.FC = () => {
                 </label>
                 {uploadProfilePictureMutation.isPending && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-white"></div>
                   </div>
                 )}
               </div>
               
-              <div>
-                <h1 className="text-3xl font-bold mb-2">{user?.full_name || 'User'}</h1>
-                <p className="text-blue-100 mb-1">{user?.email}</p>
-                <p className="text-blue-200 text-sm">
+              <div className="text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">{user?.full_name || 'User'}</h1>
+                <p className="text-gray-300 mb-1 text-sm sm:text-base">{user?.email}</p>
+                <p className="text-gray-400 text-xs sm:text-sm">
                   Member since January 2024
                 </p>
-                <div className="flex items-center space-x-4 mt-4">
+                <div className="flex flex-col sm:flex-row items-center sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mt-3 sm:mt-4">
                   <div className="flex items-center space-x-1">
                     {[...Array(5)].map((_, i) => (
-                      <StarSolidIcon key={i} className="w-4 h-4 text-yellow-400" />
+                      <StarSolidIcon key={i} className="w-3 h-3 sm:w-4 sm:h-4 text-secondary" />
                     ))}
                   </div>
-                  <span className="text-sm">Community Rating: 4.8</span>
+                  <span className="text-xs sm:text-sm">Community Rating: 4.8</span>
                 </div>
               </div>
             </div>
             
             <button
               onClick={() => setIsEditing(true)}
-              className="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-lg font-medium transition-all flex items-center space-x-2"
+              className="bg-secondary hover:bg-secondary-700 px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-medium transition-all flex items-center space-x-2 text-sm sm:text-base w-full sm:w-auto justify-center"
             >
               <PencilIcon className="w-4 h-4" />
               <span>Edit Profile</span>
@@ -284,37 +284,38 @@ const UserProfile: React.FC = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
               <div className="text-center">
-                <div className={`text-3xl font-bold ${stat.color} mb-2`}>
+                <div className={`text-2xl sm:text-3xl font-bold ${stat.color} mb-1 sm:mb-2`}>
                   {stat.value}
                 </div>
-                <div className="text-gray-600 text-sm">{stat.label}</div>
+                <div className="text-gray-600 text-xs sm:text-sm">{stat.label}</div>
               </div>
             </div>
           ))}
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 sm:mb-8">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                    className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                    className={`flex items-center space-x-2 py-3 sm:py-4 px-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                       activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
+                        ? 'border-secondary text-secondary'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span>{tab.label}</span>
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
                   </button>
                 );
               })}
@@ -478,7 +479,7 @@ const UserProfile: React.FC = () => {
                             </div>
                             <div className="flex items-center space-x-2">
                               <CheckCircleIcon className="w-5 h-5 text-green-500" />
-                              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                              <button className="text-secondary hover:text-secondary-700 text-sm font-medium">
                                 Rate Event
                               </button>
                             </div>
@@ -544,7 +545,7 @@ const UserProfile: React.FC = () => {
                               </div>
                               <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
-                                  className="bg-blue-600 h-2 rounded-full"
+                                  className="bg-secondary h-2 rounded-full"
                                   style={{ width: `${(achievement.progress / 10) * 100}%` }}
                                 ></div>
                               </div>
@@ -581,7 +582,7 @@ const UserProfile: React.FC = () => {
                       )}
                     </div>
                     <div>
-                      <label className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+                      <label className="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-700 transition-colors cursor-pointer">
                         <CameraIcon className="w-4 h-4 mr-2" />
                         {uploadProfilePictureMutation.isPending ? 'Uploading...' : 'Change Picture'}
                         <input
@@ -610,7 +611,7 @@ const UserProfile: React.FC = () => {
                         name="full_name"
                         value={profileData.full_name}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
                       />
                     </div>
                     
@@ -623,7 +624,7 @@ const UserProfile: React.FC = () => {
                         name="email"
                         value={profileData.email}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -645,7 +646,7 @@ const UserProfile: React.FC = () => {
                     <button
                       type="submit"
                       disabled={updateProfileMutation.isPending}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      className="px-6 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-700 transition-colors disabled:opacity-50"
                     >
                       {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -682,7 +683,7 @@ const UserProfile: React.FC = () => {
                     name="full_name"
                     value={profileData.full_name}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
                   />
                 </div>
                 
@@ -695,7 +696,7 @@ const UserProfile: React.FC = () => {
                     name="email"
                     value={profileData.email}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
                   />
                 </div>
 
@@ -710,7 +711,7 @@ const UserProfile: React.FC = () => {
                   <button
                     type="submit"
                     disabled={updateProfileMutation.isPending}
-                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+                    className="flex-1 bg-secondary text-white py-3 px-4 rounded-lg hover:bg-secondary-700 transition-colors font-medium disabled:opacity-50"
                   >
                     {updateProfileMutation.isPending ? 'Saving...' : 'Save'}
                   </button>

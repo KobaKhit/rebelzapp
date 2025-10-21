@@ -131,8 +131,9 @@ python create_admin.py
 
 ## 📚 Learn More
 
-- **Detailed Setup**: See `SETUP_COMPLETE.md`
-- **Database Config**: See `DIGITALOCEAN_SETUP.md`
+- **Detailed Setup**: See `docs/SETUP_COMPLETE.md`
+- **Database Config**: See `docs/DIGITALOCEAN_SETUP.md`
+- **Security Guide**: See `docs/SECURITY.md`
 - **Full Documentation**: See `README.md`
 
 ---

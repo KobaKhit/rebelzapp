@@ -82,7 +82,7 @@ def test_connection():
         else:
             print("   - Check your DATABASE_URL in .env file")
             print("   - Verify all connection parameters are correct")
-            print("   - See DIGITALOCEAN_SETUP.md for detailed setup guide")
+            print("   - See docs/DIGITALOCEAN_SETUP.md for detailed setup guide")
         
         return False
 
