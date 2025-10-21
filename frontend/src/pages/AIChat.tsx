@@ -29,8 +29,8 @@ const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [useAGUI, setUseAGUI] = useState(true); // Enabled with proper SSE support
-  const [useCopilotKit, setUseCopilotKit] = useState(true); // Enabled with proper SSE support
+  const [useAGUI, setUseAGUI] = useState(false); // Disabled until backend is deployed with SSE endpoint
+  const [useCopilotKit, setUseCopilotKit] = useState(false); // Disabled until backend is deployed
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: suggestions = [] } = useQuery({
@@ -228,16 +228,14 @@ const Chat: React.FC = () => {
 
           {/* Chat Content */}
           {useAGUI ? (
-            <CopilotKitWrapper runtimeUrl="/api/copilotkit">
-              <div className="flex-1">
-                <EnhancedAGUIChat
-                  endpoint="/ai"
-                  onMessage={handleAGUIMessage}
-                  onEvent={handleAGUIEvent}
-                  enableCopilotActions={useCopilotKit}
-                />
-              </div>
-            </CopilotKitWrapper>
+            <div className="flex-1">
+              <EnhancedAGUIChat
+                endpoint="/ai"
+                onMessage={handleAGUIMessage}
+                onEvent={handleAGUIEvent}
+                enableCopilotActions={false}
+              />
+            </div>
           ) : (
             <>
               {/* Messages */}
