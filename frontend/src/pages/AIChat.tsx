@@ -29,8 +29,8 @@ const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [useAGUI, setUseAGUI] = useState(true);
-  const [useCopilotKit, setUseCopilotKit] = useState(true);
+  const [useAGUI, setUseAGUI] = useState(true); // Enabled with proper SSE support
+  const [useCopilotKit, setUseCopilotKit] = useState(true); // Enabled with proper SSE support
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: suggestions = [] } = useQuery({

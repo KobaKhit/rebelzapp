@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
+import asyncio
 from typing import Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -12,18 +14,9 @@ from app.services.llm import RebelzAgent
 
 router = APIRouter()
 
-@router.get("/copilotkit")
-async def copilotkit_health():
-    """CopilotKit health check endpoint"""
-    return JSONResponse({
-        "status": "healthy",
-        "service": "copilotkit-runtime",
-        "version": "1.0.0"
-    })
-
 async def get_current_user_optional(
-    authorization: Optional[str] = Header(None),
-    db: Session = Depends(get_db)
+    authorization: Optional[str],
+    db: Session
 ) -> Optional[User]:
     """Get current user if token is provided, otherwise return None"""
     if not authorization or not authorization.startswith("Bearer "):
@@ -43,13 +36,71 @@ async def get_current_user_optional(
     
     return None
 
+@router.get("/copilotkit")
+async def copilotkit_sse(
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db)
+):
+    """CopilotKit Server-Sent Events endpoint for real-time communication"""
+    # Get current user if authenticated
+    current_user = await get_current_user_optional(authorization, db)
+    
+    async def event_stream():
+        try:
+            # Send initial connection event
+            connection_data = {
+                'type': 'connection',
+                'data': {
+                    'status': 'connected',
+                    'authenticated': current_user is not None
+                }
+            }
+            if current_user:
+                connection_data['data']['user'] = current_user.email
+            
+            yield f"data: {json.dumps(connection_data)}\n\n"
+            
+            # Keep connection alive with heartbeat
+            while True:
+                await asyncio.sleep(30)  # Send heartbeat every 30 seconds
+                heartbeat_data = {
+                    'type': 'heartbeat',
+                    'data': {
+                        'timestamp': 'now',
+                        'authenticated': current_user is not None
+                    }
+                }
+                yield f"data: {json.dumps(heartbeat_data)}\n\n"
+        except asyncio.CancelledError:
+            # Connection closed by client
+            print(f"CopilotKit SSE connection closed for user: {current_user.email if current_user else 'anonymous'}")
+        except Exception as e:
+            print(f"CopilotKit SSE error: {e}")
+            error_data = {'type': 'error', 'data': {'message': str(e)}}
+            yield f"data: {json.dumps(error_data)}\n\n"
+    
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Cache-Control, Authorization",
+            "X-Accel-Buffering": "no"  # Disable nginx buffering
+        }
+    )
+
 @router.post("/copilotkit")
 async def copilotkit_runtime(
     request: Request,
-    current_user: Optional[User] = Depends(get_current_user_optional),
+    authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
     """CopilotKit runtime endpoint for handling actions and chat"""
+    # Get current user if authenticated
+    current_user = await get_current_user_optional(authorization, db)
+    
     try:
         body = await request.json()
         
