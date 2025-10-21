@@ -10,8 +10,9 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 
 # Install frontend dependencies (including dev dependencies for build)
-# Use npm install instead of npm ci to properly handle optional dependencies in Alpine
-RUN npm install
+# Explicitly install the rollup binary for Alpine Linux (musl)
+RUN npm install --no-save @rollup/rollup-linux-x64-musl && \
+    npm install
 
 # Copy frontend source
 COPY frontend/ ./
