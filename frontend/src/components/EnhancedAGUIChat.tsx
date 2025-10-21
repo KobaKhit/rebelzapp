@@ -214,11 +214,13 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
       try {
         // Get auth token for SSE connection
         const token = localStorage.getItem('token');
-        const eventSourceUrl = token 
-          ? `/ai/events?token=${encodeURIComponent(token)}`
-          : `/ai/events`;
         
-        // Use Server-Sent Events for AG-UI communication
+        // Use Server-Sent Events for AG-UI communication via CopilotKit endpoint
+        // Note: EventSource doesn't support custom headers, so we pass token as query param
+        const eventSourceUrl = token 
+          ? `/api/copilotkit?token=${encodeURIComponent(token)}`
+          : `/api/copilotkit`;
+        
         const eventSource = new EventSource(eventSourceUrl);
         eventSourceRef.current = eventSource;
 

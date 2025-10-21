@@ -38,12 +38,15 @@ async def get_current_user_optional(
 
 @router.get("/copilotkit")
 async def copilotkit_sse(
+    token: Optional[str] = None,
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
     """CopilotKit Server-Sent Events endpoint for real-time communication"""
     # Get current user if authenticated
-    current_user = await get_current_user_optional(authorization, db)
+    # EventSource doesn't support custom headers, so we accept token as query param
+    auth_header = f"Bearer {token}" if token else authorization
+    current_user = await get_current_user_optional(auth_header, db)
     
     async def event_stream():
         try:
