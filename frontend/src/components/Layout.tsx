@@ -85,7 +85,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigation = isAdmin ? adminNavigation : consumerNavigation;
   const filteredNavigation = navigation.filter(item => {
     const navItem = item as typeof adminNavigation[0];
-    return !('permission' in navItem) || hasPermission(navItem.permission) || (navItem.alternativePermission && hasPermission(navItem.alternativePermission));
+    return !('permission' in navItem) || hasPermission(navItem.permission || '') || (navItem.alternativePermission && hasPermission(navItem.alternativePermission));
   });
 
   return (

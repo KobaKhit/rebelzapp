@@ -46,7 +46,7 @@ const Chat: React.FC = () => {
   const chatMutation = useMutation({
     mutationFn: (messages: ChatMessage[]) => aiApi.chat(messages),
     onSuccess: (response) => {
-      const assistantMessage = response.choices[0]?.message;
+      const assistantMessage = response.choices?.[0]?.message;
       if (assistantMessage) {
         setMessages(prev => [...prev, {
           role: 'assistant',

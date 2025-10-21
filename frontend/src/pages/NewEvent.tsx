@@ -315,7 +315,7 @@ const NewEvent: React.FC = () => {
                   <select
                     id={fieldName}
                     name={fieldName}
-                    value={fieldValue}
+                    value={fieldValue || ''}
                     onChange={handleInputChange}
                     className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
                       fieldError ? 'ring-red-300' : 'ring-gray-300'
@@ -335,7 +335,7 @@ const NewEvent: React.FC = () => {
                     type="number"
                     id={fieldName}
                     name={fieldName}
-                    value={fieldValue}
+                    value={fieldValue || ''}
                     onChange={handleInputChange}
                     placeholder={field.placeholder}
                     className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
@@ -349,7 +349,7 @@ const NewEvent: React.FC = () => {
                     type="datetime-local"
                     id={fieldName}
                     name={fieldName}
-                    value={fieldValue}
+                    value={fieldValue || ''}
                     onChange={handleInputChange}
                     className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
                       fieldError ? 'ring-red-300' : 'ring-gray-300'

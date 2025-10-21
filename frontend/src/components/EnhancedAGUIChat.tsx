@@ -30,7 +30,7 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   type?: 'text' | 'events';
-  events?: Array<{ id: number; title: string; start_time: string; type: string; status?: string }>;
+  events?: Array<{ id: number; title: string; start_time: string; type: string; status: string }>;
   title?: string;
 }
 

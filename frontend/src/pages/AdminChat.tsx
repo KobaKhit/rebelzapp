@@ -368,7 +368,7 @@ const AdminChat: React.FC = () => {
                         </span>
                         {member.user?.id !== selectedGroup.managed_by_id && (
                           <button
-                            onClick={() => handleRemoveUser(member.user.id)}
+                            onClick={() => member.user && handleRemoveUser(member.user.id)}
                             disabled={removeUserMutation.isPending}
                             className="text-red-600 hover:text-red-800 disabled:opacity-50"
                           >
