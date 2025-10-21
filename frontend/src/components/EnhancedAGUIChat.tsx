@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
+import { useCopilotAction, useCopilotReadable, useCopilotChat } from '@copilotkit/react-core';
 import { CopilotTextarea } from '@copilotkit/react-textarea';
 import AGUIEventCard from './AGUIEventCard';
 
-// Define AG-UI types since @ag-ui/core exports may vary
+// AG-UI types
 interface AGUIMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -14,8 +14,6 @@ interface AGUIEvent {
   type: string;
   data: Record<string, unknown>;
 }
-
-type AGUIEventType = string;
 
 interface EnhancedAGUIChatProps {
   endpoint: string;
@@ -46,6 +44,13 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+
+  // Use CopilotKit's built-in chat hook for better integration
+  const { 
+    isLoading: copilotLoading,
+    messages: copilotMessages,
+    appendMessage
+  } = useCopilotChat();
 
   // Make chat context readable to CopilotKit
   useCopilotReadable({
@@ -208,25 +213,23 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
     scrollToBottom();
   }, [messages, isTyping]);
 
-  // Initialize AG-UI connection
+  // Initialize AG-UI SSE connection
   useEffect(() => {
     const connectToAGUI = () => {
       try {
-        // Get auth token for SSE connection
         const token = localStorage.getItem('token');
         
-        // Use Server-Sent Events for AG-UI communication via CopilotKit endpoint
-        // Note: EventSource doesn't support custom headers, so we pass token as query param
+        // Connect to AG-UI SSE endpoint
         const eventSourceUrl = token 
-          ? `/api/copilotkit?token=${encodeURIComponent(token)}`
-          : `/api/copilotkit`;
+          ? `/ai/events?token=${encodeURIComponent(token)}`
+          : `/ai/events`;
         
         const eventSource = new EventSource(eventSourceUrl);
         eventSourceRef.current = eventSource;
 
         eventSource.onopen = () => {
           setIsConnected(true);
-          console.log('AG-UI connection established');
+          console.log('AG-UI SSE connection established');
         };
 
         eventSource.onmessage = (event) => {
@@ -240,10 +243,10 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
                 break;
                 
               case 'heartbeat':
-                // Keep connection alive, no action needed
+                // Keep connection alive
                 break;
                 
-              case 'message' as AGUIEventType: {
+              case 'message':
                 const messageData = agUIEvent.data as unknown as AGUIMessage;
                 if (messageData.role === 'assistant') {
                   setMessages(prev => [...prev, {
@@ -256,13 +259,12 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
                 }
                 onMessage?.(messageData);
                 break;
-              }
 
-              case 'thinking' as AGUIEventType:
+              case 'thinking':
                 setIsTyping(true);
                 break;
 
-              case 'error' as AGUIEventType:
+              case 'error':
                 console.error('AG-UI Error:', agUIEvent.data);
                 setMessages(prev => [...prev, {
                   id: Date.now().toString(),
@@ -284,7 +286,7 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
         eventSource.onerror = (error) => {
           setIsConnected(false);
           setIsTyping(false);
-          console.error('AG-UI connection error:', error);
+          console.error('AG-UI SSE connection error:', error);
           
           // Attempt to reconnect after a delay
           setTimeout(() => {
@@ -324,7 +326,6 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
     setIsTyping(true);
 
     try {
-      // Get auth token
       const token = localStorage.getItem('token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -343,15 +344,15 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
             role: 'user',
             content: content.trim()
           }
-        } as AGUIEvent)
+        })
       });
 
       if (!response.ok) {
         throw new Error('Failed to send message');
       }
 
-      // Handle the response from the message endpoint
       const responseData = await response.json();
+      
       if (responseData.type === 'message' && responseData.data) {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
@@ -460,7 +461,7 @@ export const EnhancedAGUIChat: React.FC<EnhancedAGUIChatProps> = ({
                   </div>
                 ) : (
                   <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
-                    <p className="text-sm">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     <p className="text-xs mt-1 text-gray-500">
                       {message.timestamp.toLocaleTimeString()}
                     </p>

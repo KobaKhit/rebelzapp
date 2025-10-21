@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import List
-from fastapi import APIRouter, Depends, Request
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Request, Header
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 import json
@@ -11,6 +11,16 @@ from app.api.deps import get_current_user
 from app.db.database import get_db
 from app.models import User
 from app.schemas.auth import ChatRequest, ChatResponse
+from app.schemas.agui import (
+    AGUIMessageRequest, 
+    AGUIMessageResponse, 
+    AGUIEvent,
+    AGUIConnectionData,
+    AGUIHeartbeatData,
+    AGUIEventsData,
+    AGUITextData,
+    AGUIErrorData
+)
 from app.services.llm import ContextAwareLLMClient, RebelzAgent
 
 
@@ -77,49 +87,64 @@ async def get_help_topics() -> List[dict]:
 	]
 
 
-# Server-Sent Events endpoint for AG-UI
+# Server-Sent Events endpoint for AG-UI with Pydantic models
 @router.get("/events")
 async def ag_ui_events(
-	token: str = None,
+	token: Optional[str] = None,
+	authorization: Optional[str] = Header(None),
 	db: Session = Depends(get_db)
 ):
-	"""Server-Sent Events stream for AG-UI communication"""
-	# Validate token if provided
+	"""Server-Sent Events stream for AG-UI communication with Pydantic validation"""
+	# Validate token if provided (either from query param or header)
 	current_user = None
-	if token:
+	auth_token = token or (authorization.replace("Bearer ", "") if authorization else None)
+	
+	if auth_token:
 		try:
 			from app.services.security import decode_access_token
-			from app.models import User
-			payload = decode_access_token(token)
+			payload = decode_access_token(auth_token)
 			user_id = payload.get("sub")
 			if user_id:
 				current_user = db.get(User, int(user_id))
 		except Exception as e:
 			print(f"Token validation error in SSE: {e}")
-			# Continue without user context for now
+			# Continue without user context
 	
 	async def event_stream():
 		try:
-			# Send initial connection event
-			connection_data = {'type': 'connection', 'data': {'status': 'connected'}}
-			if current_user:
-				connection_data['data']['user'] = current_user.email
-			yield f"data: {json.dumps(connection_data)}\n\n"
+			# Send initial connection event using Pydantic model
+			connection_data = AGUIEvent(
+				type="connection",
+				data=AGUIConnectionData(
+					status="connected",
+					authenticated=current_user is not None,
+					user=current_user.email if current_user else None
+				).model_dump()
+			)
+			yield f"data: {connection_data.model_dump_json()}\n\n"
 			
 			# Keep connection alive with heartbeat
 			while True:
 				await asyncio.sleep(30)  # Send heartbeat every 30 seconds
-				heartbeat_data = {
-					'type': 'heartbeat', 
-					'data': {
-						'timestamp': 'now',
-						'authenticated': current_user is not None
-					}
-				}
-				yield f"data: {json.dumps(heartbeat_data)}\n\n"
+				heartbeat_data = AGUIEvent(
+					type="heartbeat",
+					data=AGUIHeartbeatData(
+						timestamp="now",
+						authenticated=current_user is not None
+					).model_dump()
+				)
+				yield f"data: {heartbeat_data.model_dump_json()}\n\n"
+		except asyncio.CancelledError:
+			print(f"SSE connection closed for user: {current_user.email if current_user else 'anonymous'}")
 		except Exception as e:
 			print(f"Event stream error: {e}")
-			yield f"data: {json.dumps({'type': 'error', 'data': {'message': 'Stream error'}})}\n\n"
+			import traceback
+			traceback.print_exc()
+			error_event = AGUIEvent(
+				type="error",
+				data=AGUIErrorData(message="Stream error").model_dump()
+			)
+			yield f"data: {error_event.model_dump_json()}\n\n"
 	
 	return StreamingResponse(
 		event_stream(),
@@ -128,26 +153,28 @@ async def ag_ui_events(
 			"Cache-Control": "no-cache",
 			"Connection": "keep-alive",
 			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Headers": "Cache-Control, Authorization"
+			"Access-Control-Allow-Headers": "Cache-Control, Authorization",
+			"X-Accel-Buffering": "no"
 		}
 	)
 
 
-# AG-UI message endpoint
-@router.post("/message")
+# AG-UI message endpoint with Pydantic validation
+@router.post("/message", response_model=AGUIMessageResponse)
 async def ag_ui_message(
-	request: Request,
+	message_request: AGUIMessageRequest,
 	current_user: User = Depends(get_current_user),
 	db: Session = Depends(get_db)
-):
-	"""Handle AG-UI message requests"""
+) -> AGUIMessageResponse:
+	"""Handle AG-UI message requests with Pydantic validation"""
 	try:
-		body = await request.json()
-		message_data = body.get('data', {})
-		user_content = message_data.get('content', '')
+		user_content = message_request.data.content
 		
 		if not user_content:
-			return {"type": "error", "data": {"message": "No content provided"}}
+			return AGUIMessageResponse(
+				type="error",
+				data=AGUIErrorData(message="No content provided").model_dump()
+			)
 		
 		# Use the RebelzAgent to process the message
 		agent = RebelzAgent()
@@ -155,33 +182,37 @@ async def ag_ui_message(
 		
 		# Handle structured responses (like events)
 		if isinstance(response, dict) and response.get("type") == "events":
-			return {
-				"type": "events",
-				"data": response
-			}
+			return AGUIMessageResponse(
+				type="events",
+				data=response
+			)
 		elif isinstance(response, dict) and response.get("type") == "text":
-			return {
-				"type": "message",
-				"data": {
-					"role": "assistant",
-					"content": response.get("content", "")
-				}
-			}
+			return AGUIMessageResponse(
+				type="message",
+				data=AGUITextData(
+					role="assistant",
+					content=response.get("content", "")
+				).model_dump()
+			)
 		else:
 			# Fallback for string responses
-			return {
-				"type": "message",
-				"data": {
-					"role": "assistant",
-					"content": str(response)
-				}
-			}
+			return AGUIMessageResponse(
+				type="message",
+				data=AGUITextData(
+					role="assistant",
+					content=str(response)
+				).model_dump()
+			)
 	except Exception as e:
-		print(f"AG-UI Message Error: {str(e)}")  # Simple error logging
-		return {
-			"type": "error", 
-			"data": {"message": f"Error processing message: {str(e)}"}
-		}
+		print(f"AG-UI Message Error: {str(e)}")
+		import traceback
+		traceback.print_exc()
+		return AGUIMessageResponse(
+			type="error",
+			data=AGUIErrorData(
+				message=f"Error processing message: {str(e)}"
+			).model_dump()
+		)
 
 
 # AG-UI endpoint - mount the agent as a sub-application

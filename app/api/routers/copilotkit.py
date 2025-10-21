@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import json
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
@@ -13,6 +14,28 @@ from app.models import User, Event, EventRegistration
 from app.services.llm import RebelzAgent
 
 router = APIRouter()
+
+
+# CopilotKit Protocol Schemas
+class CopilotKitMessage(BaseModel):
+    role: str
+    content: str
+
+
+class CopilotKitChatRequest(BaseModel):
+    messages: List[CopilotKitMessage]
+    model: Optional[str] = None
+
+
+class CopilotKitAction(BaseModel):
+    name: str
+    description: str
+    parameters: Dict[str, Any]
+
+
+class CopilotKitActionRequest(BaseModel):
+    action: str
+    parameters: Dict[str, Any]
 
 async def get_current_user_optional(
     authorization: Optional[str],
@@ -100,32 +123,69 @@ async def copilotkit_runtime(
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
-    """CopilotKit runtime endpoint for handling actions and chat"""
+    """CopilotKit runtime endpoint for handling actions and chat
+    
+    This endpoint handles the CopilotKit protocol which expects:
+    - POST with messages array for chat
+    - Streaming responses for real-time interaction
+    """
     # Get current user if authenticated
     current_user = await get_current_user_optional(authorization, db)
     
     try:
         body = await request.json()
         
-        # Handle CopilotKit protocol - it sends different message formats
-        # Check for CopilotKit standard message format
+        # Handle CopilotKit protocol
         if "messages" in body:
-            return await handle_copilotkit_chat(body, current_user, db)
+            # Chat request - return streaming response
+            return StreamingResponse(
+                handle_copilotkit_chat_stream(body, current_user, db),
+                media_type="text/event-stream",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "X-Accel-Buffering": "no"
+                }
+            )
         elif "action" in body:
             return await handle_copilotkit_action(body, current_user, db)
-        elif body.get("type") == "suggestions" or "text" in body:
-            # Handle autosuggestion requests
-            return await handle_copilotkit_suggestions(body, current_user, db)
         else:
-            # Default response for CopilotKit initialization
+            # Return available actions
             return JSONResponse({
-                "status": "ready",
-                "authenticated": current_user is not None,
-                "user": current_user.email if current_user else None
+                "actions": [
+                    {
+                        "name": "createEvent",
+                        "description": "Create a new event in the system",
+                        "parameters": {
+                            "title": {"type": "string", "description": "Event title", "required": True},
+                            "description": {"type": "string", "description": "Event description", "required": True},
+                            "eventType": {"type": "string", "description": "Type of event", "required": True},
+                            "startDateTime": {"type": "string", "description": "Start date/time (ISO format)", "required": True},
+                            "endDateTime": {"type": "string", "description": "End date/time (ISO format)", "required": True}
+                        }
+                    },
+                    {
+                        "name": "searchEvents",
+                        "description": "Search for events",
+                        "parameters": {
+                            "query": {"type": "string", "description": "Search query", "required": False},
+                            "eventType": {"type": "string", "description": "Filter by event type", "required": False}
+                        }
+                    },
+                    {
+                        "name": "registerForEvent",
+                        "description": "Register for an event",
+                        "parameters": {
+                            "eventId": {"type": "number", "description": "Event ID", "required": True}
+                        }
+                    }
+                ]
             })
             
     except Exception as e:
         print(f"CopilotKit runtime error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JSONResponse(
             status_code=500,
             content={"error": f"CopilotKit runtime error: {str(e)}"}
@@ -276,8 +336,11 @@ async def register_for_event_action(params: Dict[str, Any], user: User, db: Sess
     except Exception as e:
         return {"success": False, "error": f"Failed to register for event: {str(e)}"}
 
-async def handle_copilotkit_chat(body: Dict[str, Any], user: Optional[User], db: Session) -> Dict[str, Any]:
-    """Handle CopilotKit chat requests"""
+async def handle_copilotkit_chat_stream(body: Dict[str, Any], user: Optional[User], db: Session):
+    """Handle CopilotKit chat requests with streaming
+    
+    CopilotKit expects Server-Sent Events format for streaming responses
+    """
     try:
         messages = body.get("messages", [])
         
@@ -292,27 +355,45 @@ async def handle_copilotkit_chat(body: Dict[str, Any], user: Optional[User], db:
                 break
         
         if not user_message:
-            return {"success": False, "error": "No user message found"}
+            # Send error event
+            yield f"data: {json.dumps({'error': 'No user message found'})}\n\n"
+            return
+        
+        # Send thinking event
+        yield f"data: {json.dumps({'type': 'thinking'})}\n\n"
         
         # Process with the agent (works with or without user context)
         response = await agent.run(user_message, user=user, db=db)
         
-        # Return response in CopilotKit expected format
-        return {
-            "messages": messages + [{
+        # Format response content
+        if isinstance(response, dict):
+            content = response.get("content", str(response))
+        else:
+            content = str(response)
+        
+        # Send the response as a message event
+        message_data = {
+            "type": "message",
+            "message": {
                 "role": "assistant",
-                "content": str(response) if not isinstance(response, dict) else response.get("content", str(response))
-            }]
+                "content": content
+            }
         }
+        yield f"data: {json.dumps(message_data)}\n\n"
+        
+        # Send done event
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
         
     except Exception as e:
         print(f"Chat processing error: {str(e)}")
-        return {
-            "messages": messages + [{
-                "role": "assistant", 
-                "content": f"Sorry, I encountered an error: {str(e)}"
-            }]
+        import traceback
+        traceback.print_exc()
+        
+        error_data = {
+            "type": "error",
+            "error": f"Sorry, I encountered an error: {str(e)}"
         }
+        yield f"data: {json.dumps(error_data)}\n\n"
 
 async def handle_copilotkit_suggestions(body: Dict[str, Any], user: Optional[User], db: Session) -> Dict[str, Any]:
     """Handle CopilotKit autosuggestion requests"""

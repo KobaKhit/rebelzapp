@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { CopilotKit } from '@copilotkit/react-core';
 import { CopilotSidebar } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
@@ -15,14 +15,22 @@ export const CopilotKitProvider: React.FC<CopilotKitProviderProps> = ({
   // Get auth token for CopilotKit
   const token = localStorage.getItem('token');
   
-  const headers = token ? {
-    'Authorization': `Bearer ${token}`
-  } : undefined;
+  // Memoize headers to prevent unnecessary re-renders
+  const headers = useMemo(() => {
+    return token ? {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : {
+      'Content-Type': 'application/json'
+    };
+  }, [token]);
 
   return (
     <CopilotKit 
       runtimeUrl={runtimeUrl}
       headers={headers}
+      // Enable streaming for better performance
+      showDevConsole={import.meta.env.DEV}
     >
       {children}
     </CopilotKit>
@@ -43,14 +51,21 @@ export const CopilotKitWrapper: React.FC<CopilotKitWrapperProps> = ({
   // Get auth token for CopilotKit
   const token = localStorage.getItem('token');
   
-  const headers = token ? {
-    'Authorization': `Bearer ${token}`
-  } : undefined;
+  // Memoize headers to prevent unnecessary re-renders
+  const headers = useMemo(() => {
+    return token ? {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : {
+      'Content-Type': 'application/json'
+    };
+  }, [token]);
 
   return (
     <CopilotKit 
       runtimeUrl={runtimeUrl}
       headers={headers}
+      showDevConsole={import.meta.env.DEV}
     >
       {showSidebar ? (
         <CopilotSidebar>
