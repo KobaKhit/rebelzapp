@@ -10,7 +10,8 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 
 # Install frontend dependencies (including dev dependencies for build)
-RUN npm ci
+# Use npm install instead of npm ci to properly handle optional dependencies in Alpine
+RUN npm install
 
 # Copy frontend source
 COPY frontend/ ./
